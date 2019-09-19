@@ -50,7 +50,23 @@ class RealNumberFeature(object):
 
 # An agent with the ability to make decisions
 class Agent:
+    satisfaction = 1
+    satisfaction_threshold = 0.5
+
     def __init__(self, religion: CategoricalFeature, ethnicity: CategoricalFeature, income: RealNumberFeature):
         self.income = income
         self.religion = religion
         self.ethnicity = ethnicity
+
+    def satisfied(self, neighbors):
+
+        # There's probably an even shorter way of doing this in python
+        neighbor_income_satisfaction = [self.income.preference(n) for n in neighbors]
+        neighbor_religion_satisfaction = [self.income.preference(n) for n in neighbors]
+        neighbor_ethnicity_satisfaction = [self.income.preference(n) for n in neighbors]
+
+        # 3 arrays can be treated as a matrix, np.average averages all of the numbers
+        self.satisfaction = np.average([neighbor_income_satisfaction, neighbor_religion_satisfaction,
+                                        neighbor_ethnicity_satisfaction])
+
+        return self.satisfaction >= self.satisfaction_threshold
