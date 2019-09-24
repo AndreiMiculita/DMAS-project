@@ -101,7 +101,7 @@ class Agent:
 
 
 if __name__ == "__main__":
-    agent_list = [Agent(100, 100,
+    agent_list = [Agent(100, ethnicity=BinaryFeature(value=random.choice([True, False])),
                         income=RealNumberFeature(value=random.randint(0, 100), threshold=20)) for i in range(0, 100)]
     print([str(x) for x in agent_list])
     for x in range(0, 99):
