@@ -49,7 +49,7 @@ class RealNumberFeature(object):
         return self.difference_function(abs(other.value - self.value)) > self.threshold
 
 
-# When a feature is a real number
+# When a feature is binary
 class BinaryFeature(object):
     def __init__(self, value: bool):
         self.value = value
@@ -78,9 +78,9 @@ class Agent:
         # First put all the satisfactions in arrays, for each feature and each neighbor
         # There's probably an even shorter way of doing this in python
         neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors]
-        neighbor_religion_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors]
         # Use income temporarily
-        neighbor_ethnicity_satisfactions = [self.income.preference(n.income) for n in neighbors]
+        neighbor_religion_satisfactions = [self.income.preference(n.ethnicity) for n in neighbors]
+        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.income) for n in neighbors]
 
         # Calculate the average satisfaction for each feature
         avg_neighbor_income_satisfaction = np.average(neighbor_income_satisfactions)
@@ -101,7 +101,7 @@ class Agent:
 
 
 if __name__ == "__main__":
-    agent_list = [Agent(100, 100,
+    agent_list = [Agent(100, ethnicity=BinaryFeature(value=random.choice([True, False])),
                         income=RealNumberFeature(value=random.randint(0, 100), threshold=20)) for i in range(0, 100)]
     print([str(x) for x in agent_list])
     for x in range(0, 99):
