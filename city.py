@@ -1,6 +1,8 @@
-from PIL import Image
-import numpy as np
 import random
+
+import numpy as np
+from PIL import Image
+
 from agent import Agent, RealNumberFeature, BinaryFeature
 
 # Width and height of the city grid
