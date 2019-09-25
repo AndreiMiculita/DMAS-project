@@ -1,9 +1,10 @@
 import random
+import sys
 
 import numpy as np
 from PIL import Image
 
-from agent import Agent, RealNumberFeature, BinaryFeature
+from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
 
 # Width and height of the city grid
 w, h = 128, 128
@@ -12,7 +13,8 @@ w, h = 128, 128
 min_price = 10000
 max_price = 1000000
 
-# Max income of residents
+# Min/max income of residents
+min_income = 100
 max_income = 100000
 
 # if 0 - price will not have any noise
@@ -70,20 +72,44 @@ if __name__ == "__main__":
                 price = (price + max_price * price_segregation) / (1 + price_segregation)
 
             # 1 in 10 probability of an empty house
-            empty = random.randint(1, 1/empty_ratio) == 1
+            empty = random.randint(1, 1 / empty_ratio) == 1
 
             if not empty:
                 # Creating a random agent that lives in that home
                 eth = random.randint(1, 5) == 1
-                a = Agent(100,
+                a = Agent(religion=CategoricalFeature(value=random.choice(list(Religion)),
+                                                      preference_matrix=religion_preference_matrix),
                           ethnicity=BinaryFeature(value=eth),
-                          income=RealNumberFeature(value=random.randint(0, max_income), threshold=20))
+                          income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=20))
             else:
                 a = None
             # Generating a home with a price depending on its location and its address
             city[x][y] = Home(price=price, address=(x, y), empty=empty, occupant=a)
 
     data = np.zeros((h + 2, w + 2, 3), dtype=np.uint8)
+
+    sys.stdout = open("out.csv", "w")
+
+    # Only one time step for now
+    for _ in range(0, 1):
+        # Go through the entire city to check whether occupants are satisfied
+        for (x, y), house in np.ndenumerate(city):
+            # Skip edge for now
+            if not house.empty and x > 0 and y > 0 and x < 129 and y < 129:
+                neighboring_houses = [city[x - 1][y - 1], city[x - 1][y], city[x - 1][y + 1],
+                                      city[x][y - 1], city[x][y + 1],
+                                      city[x + 1][y - 1], city[x + 1][y], city[x + 1][y + 1]]
+                house_neighbors = []
+                # Only take into account neighbors from non-empty houses
+                for hs in neighboring_houses:
+                    if not hs.empty:
+                        house_neighbors.append(hs.occupant)
+                agent = house.occupant
+                satisfaction = agent.satisfied(house_neighbors)
+                if satisfaction[0]:
+                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
+                else:
+                    print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied, {', '.join(map(str, satisfaction[1]))}")
 
     # Plot house prices
     for (x, y), house in np.ndenumerate(city):
@@ -106,7 +132,8 @@ if __name__ == "__main__":
         if x > w or y > h:
             continue
         if not house.empty:
-            color = house.occupant.income.value / max_income * 255
+            # equation of a line through 2 points (min_income, 0) and (max_income,255)
+            color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
             data[x][y] = [color, 255, color]
         else:
             data[x][y] = [0, 0, 0]
@@ -122,7 +149,7 @@ if __name__ == "__main__":
         if x > w or y > h:
             continue
         if not house.empty:
-            if house.occupant.ethnicity:
+            if house.occupant.ethnicity.value:
                 data[x][y] = [128, 128, 255]
             else:
                 data[x][y] = [255, 255, 255]

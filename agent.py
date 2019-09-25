@@ -1,37 +1,43 @@
 import random
-from enum import Enum
+import sys
+from enum import Enum, auto
 
 import numpy as np
 
 
-# class Religion(Enum):
-#     IRRELIGIOUS = auto()
-#     ROMAN_CATHOLIC = auto()
-#     DUTCH_REFORMED = auto()
-#     PROTESTANT = auto()
-#     REFORMED_CHURCHES = auto()
-#     MUSLIM = auto()
-#     HINDU = auto()
-#     JEWISH = auto()
-#     BUDDHIST = auto()
-#
-#
-# class Ethnicity(Enum):
-#     DUTCH = auto()
-#     GERMAN = auto()
-#     TURKISH = auto()
-#     MOROCCAN = auto()
-#     INDONESIAN = auto()
-#     SURINAMESE = auto()
-#     AAD = auto()  # Antillean, Aruban, or Dutch Caribbean
+class Religion(Enum):
+    IRRELIGIOUS = auto()
+    ROMAN_CATHOLIC = auto()
+    DUTCH_REFORMED = auto()
+    PROTESTANT = auto()
+    REFORMED_CHURCHES = auto()
+    MUSLIM = auto()
+    HINDU = auto()
+    JEWISH = auto()
+    BUDDHIST = auto()
+
+
+# How much each religion likes each other religion
+religion_preference_matrix = np.ones((len(Religion), len(Religion)), dtype=float)
+
+
+class Ethnicity(Enum):
+    DUTCH = auto()
+    GERMAN = auto()
+    TURKISH = auto()
+    MOROCCAN = auto()
+    INDONESIAN = auto()
+    SURINAMESE = auto()
+    AAD = auto()  # Antillean, Aruban, or Dutch Caribbean
+
 
 # When a feature is an unordered category (e.g. religion, ethnicity)
 class CategoricalFeature:
     categories: Enum
 
-    def __init__(self, categories: Enum, threshold):
-        self.categories = categories
-        self.preference_matrix = np.ones((len(self.categories), len(self.categories)), dtype=float)
+    def __init__(self, value, preference_matrix, threshold=0.5):
+        self.value = value
+        self.preference_matrix = preference_matrix
         self.threshold = threshold
 
     def preference(self, i, j):
@@ -40,7 +46,7 @@ class CategoricalFeature:
 
 # When a feature is a real number
 class RealNumberFeature(object):
-    def __init__(self, value: float, threshold, difference_function=lambda x: x):
+    def __init__(self, value: float, threshold=20, difference_function=lambda x: x):
         self.value = value
         self.difference_function = difference_function  # the function passed as a parameter
         self.threshold = threshold
@@ -60,7 +66,6 @@ class BinaryFeature(object):
 
 # An agent with the ability to make decisions
 class Agent:
-    satisfaction = 1
     satisfaction_threshold = 0.5
 
     def __init__(self, religion: CategoricalFeature, ethnicity: BinaryFeature, income: RealNumberFeature,
@@ -91,18 +96,32 @@ class Agent:
         self.satisfaction = np.average(a=[avg_neighbor_income_satisfaction, avg_neighbor_religion_satisfaction,
                                           avg_neighbor_ethnicity_satisfaction], weights=self.weights)
 
-        return self.satisfaction >= self.satisfaction_threshold
+        # Returns a list where the first element is whether they're satisfied or not, and the 2nd element
+        # is a list containing the individual satisfations
+        return [self.satisfaction >= self.satisfaction_threshold,
+                np.array([avg_neighbor_religion_satisfaction,
+                          avg_neighbor_ethnicity_satisfaction,
+                          avg_neighbor_income_satisfaction])
+               ]
 
     def __str__(self):
-        return str(id(self)) + " " + \
-               str(self.religion) + " " + \
-               str(self.ethnicity) + " " + \
-               str(self.income)
+        return str(id(self)) + ", " + \
+               str(self.religion.value) + ", " + \
+               str(self.ethnicity.value) + ", " + \
+               str(self.income.value)
 
 
 if __name__ == "__main__":
-    agent_list = [Agent(100, ethnicity=BinaryFeature(value=random.choice([True, False])),
-                        income=RealNumberFeature(value=random.randint(0, 100), threshold=20)) for i in range(0, 100)]
+    agent_list = [Agent(religion=CategoricalFeature(value=random.choice(list(Religion)),
+                                                    preference_matrix=religion_preference_matrix),
+                        ethnicity=BinaryFeature(value=random.choice([True, False])),
+                        income=RealNumberFeature(value=random.randint(0, 100), threshold=20)) for _ in range(0, 100)]
     print([str(x) for x in agent_list])
-    for x in range(0, 99):
-        print(agent_list[x].satisfied([agent_list[x - 1], agent_list[x + 1]]))
+    sys.stdout = open("out.csv", "w")
+    for index, agent in enumerate(agent_list[1:]):
+        # Check whether an agent is satisfied with their neighbors
+        satisfaction = agent.satisfied([agent_list[index - 1], agent_list[index + 1]])
+        if satisfaction[0]:
+            print(f"{str(index)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
+        else:
+            print(f"{str(index)}, {str(agent)}, not satisfied, {', '.join(map(str, satisfaction[1]))}")
