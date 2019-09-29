@@ -6,19 +6,19 @@ import numpy as np
 
 
 class Religion(Enum):
-    IRRELIGIOUS = auto()
-    ROMAN_CATHOLIC = auto()
-    DUTCH_REFORMED = auto()
-    PROTESTANT = auto()
-    REFORMED_CHURCHES = auto()
-    MUSLIM = auto()
-    HINDU = auto()
-    JEWISH = auto()
-    BUDDHIST = auto()
+    IRRELIGIOUS = 1
+    ROMAN_CATHOLIC = 2
+    DUTCH_REFORMED = 3
+    PROTESTANT = 4
+    REFORMED_CHURCHES = 5
+    MUSLIM = 6
+    HINDU = 7
+    JEWISH = 8
+    BUDDHIST = 9
 
 
 # How much each religion likes each other religion
-religion_preference_matrix = np.ones((len(Religion), len(Religion)), dtype=float)
+religion_preference_matrix = np.identity(9, dtype=float)
 
 
 class Ethnicity(Enum):
