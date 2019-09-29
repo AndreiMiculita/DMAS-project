@@ -149,7 +149,9 @@ if __name__ == "__main__":
 
     # Go up to max_iterations
     for i in range(0, max_iterations):
-        if time_step(i) > satisfaction_threshold:
+        avg_satisfaction = time_step(i)
+        if avg_satisfaction > satisfaction_threshold:
+            print(f"Average agent satisfaction is above {satisfaction_threshold}")
             break
 
     # Plot house prices
