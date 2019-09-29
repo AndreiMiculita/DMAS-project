@@ -46,13 +46,13 @@ class CategoricalFeature:
 
 # When a feature is a real number
 class RealNumberFeature(object):
-    def __init__(self, value: float, threshold=20, difference_function=lambda x: x):
+    def __init__(self, value: float, threshold=20000, difference_function=lambda x: x):
         self.value = value
         self.difference_function = difference_function  # the function passed as a parameter
         self.threshold = threshold
 
     def preference(self, other):
-        return self.difference_function(abs(other.value - self.value)) > self.threshold
+        return self.difference_function(abs(other.value - self.value)) < self.threshold
 
 
 # When a feature is binary
@@ -75,33 +75,35 @@ class Agent:
         self.income = income
         # The weights of each feature when determining if an agent is satisfied with their position
         if weights is None:
-            weights = [1, 1, 1]
+            weights = [0, 1, 0]
         self.weights = weights
 
     # Whether an agent is satisfied with their current position
     def satisfied(self, neighbors):
         # First put all the satisfactions in arrays, for each feature and each neighbor
         # There's probably an even shorter way of doing this in python
-        neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors]
         # Use income temporarily
-        neighbor_religion_satisfactions = [self.income.preference(n.ethnicity) for n in neighbors]
-        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.income) for n in neighbors]
+        neighbor_religion_satisfactions = [self.income.preference(n.income) for n in neighbors]
+        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors]
+        neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors]
 
         # Calculate the average satisfaction for each feature
-        avg_neighbor_income_satisfaction = np.average(neighbor_income_satisfactions)
         avg_neighbor_religion_satisfaction = np.average(neighbor_religion_satisfactions)
         avg_neighbor_ethnicity_satisfaction = np.average(neighbor_ethnicity_satisfactions)
+        avg_neighbor_income_satisfaction = np.average(neighbor_income_satisfactions)
 
         # 3 arrays can be treated as a matrix, np.average averages all of the numbers
-        self.satisfaction = np.average(a=[avg_neighbor_income_satisfaction, avg_neighbor_religion_satisfaction,
-                                          avg_neighbor_ethnicity_satisfaction], weights=self.weights)
+        self.satisfaction = np.average(a=[avg_neighbor_religion_satisfaction,
+                                          avg_neighbor_ethnicity_satisfaction,
+                                          avg_neighbor_income_satisfaction], weights=self.weights)
 
         # Returns a list where the first element is whether they're satisfied or not, and the 2nd element
-        # is a list containing the individual satisfations
+        # is a list containing the individual satisfactions
         return [self.satisfaction >= self.satisfaction_threshold,
                 np.array([avg_neighbor_religion_satisfaction,
                           avg_neighbor_ethnicity_satisfaction,
-                          avg_neighbor_income_satisfaction])
+                          avg_neighbor_income_satisfaction]),
+                neighbor_ethnicity_satisfactions
                ]
 
     def __str__(self):

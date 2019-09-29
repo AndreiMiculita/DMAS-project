@@ -6,8 +6,11 @@ from PIL import Image
 
 from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
 
+# Max iterations
+max_iterations = 200
+
 # Width and height of the city grid
-w, h = 128, 128
+w, h = 16, 16
 
 # Min and max prices of homes
 min_price = 10000
@@ -25,10 +28,10 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Ratio of empty houses
-empty_ratio = 0.01
+empty_ratio = 0.05
 
 # how much to zoom in on the picture before displaying, please use integer for good results
-zoom = 5
+zoom = 10
 
 
 class Home:
@@ -42,6 +45,14 @@ class Home:
         return str(self.price)
 
 
+def neighbors(a, radius, rowNumber, columnNumber):
+    return [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
+             for j in range(columnNumber - 1 - radius, columnNumber + radius)]
+            for i in range(rowNumber - 1 - radius, rowNumber + radius)]
+
+
+flatten = lambda l: [item for sublist in l for item in sublist]
+
 if __name__ == "__main__":
     # City is a matrix with a padding
     city = np.zeros((w + 2, h + 2), dtype=object)
@@ -49,9 +60,9 @@ if __name__ == "__main__":
         for y in range(-2, h + 2):
             # These are 2 rows/columns that will not show in the bitmap,
             # but we will use them to generate the first row/column
-            if x < 0 or y < 0 or x > w or y > h:
+            if x < 0 or y < 0 or x >= w or y >= h:
                 price = random.randint(min_price, max_price)
-            # Average the 2 pixels above and the 2 pixels to the left then add noise and mod
+            # Average some neighboring houses then add noise
             else:
                 price = np.average([city[x][y - 1].price, city[x][y - 2].price,
                                     city[x - 1][y].price, city[x - 2][y].price,
@@ -76,11 +87,11 @@ if __name__ == "__main__":
 
             if not empty:
                 # Creating a random agent that lives in that home
-                eth = random.randint(1, 5) == 1
+                eth = random.randint(1, 2) == 1
                 a = Agent(religion=CategoricalFeature(value=random.choice(list(Religion)),
                                                       preference_matrix=religion_preference_matrix),
                           ethnicity=BinaryFeature(value=eth),
-                          income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=20))
+                          income=RealNumberFeature(value=random.randint(min_income, max_income)))
             else:
                 a = None
             # Generating a home with a price depending on its location and its address
@@ -88,17 +99,18 @@ if __name__ == "__main__":
 
     data = np.zeros((h + 2, w + 2, 3), dtype=np.uint8)
 
-    sys.stdout = open("out.csv", "w")
+    # sys.stdout = open("out.csv", "w")
 
-    # Only one time step for now
-    for _ in range(0, 1):
+    # Go up to max_iterations
+    for i in range(0, max_iterations):
+        if i % 100 == 0:
+            print(i)
         # Go through the entire city to check whether occupants are satisfied
         for (x, y), house in np.ndenumerate(city):
             # Skip edge for now
-            if not house.empty and x > 0 and y > 0 and x < 129 and y < 129:
-                neighboring_houses = [city[x - 1][y - 1], city[x - 1][y], city[x - 1][y + 1],
-                                      city[x][y - 1], city[x][y + 1],
-                                      city[x + 1][y - 1], city[x + 1][y], city[x + 1][y + 1]]
+            if not house.empty:
+                neighboring_houses = flatten(neighbors(city, x, y, 1))
+                neighboring_houses = list(filter(None.__ne__, neighboring_houses))
                 house_neighbors = []
                 # Only take into account neighbors from non-empty houses
                 for hs in neighboring_houses:
@@ -106,10 +118,23 @@ if __name__ == "__main__":
                         house_neighbors.append(hs.occupant)
                 agent = house.occupant
                 satisfaction = agent.satisfied(house_neighbors)
-                if satisfaction[0]:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
+                if not satisfaction[0]:
+                    if i == max_iterations - 100:
+                        print(
+                            f"{str(x)}, {str(y)}, {str(agent)}, not satisfied, {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
+                    # Move the agent to a random empty house
+                    prospects = []
+                    for (xm, ym), housem in np.ndenumerate(city):
+                        if housem.empty:
+                            prospects.append((xm, ym))
+                    target_house = city[random.choice(prospects)]
+                    target_house.occupant = house.occupant
+                    target_house.empty = False
+                    house.occupant = None
+                    house.empty = True
                 else:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied, {', '.join(map(str, satisfaction[1]))}")
+                    if i == max_iterations - 100:
+                        print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
 
     # Plot house prices
     for (x, y), house in np.ndenumerate(city):
