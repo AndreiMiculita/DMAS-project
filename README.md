@@ -19,3 +19,6 @@ By changing the `weight_list` global variable, we can notice segregation by the 
 For the sake of diversity, religion and ethnicity have been modeled differently. Religion is n-categorical while ethnicity is binary. For ethnicity, a high average city satisfaction threshold is easy to reach, taking ~20 steps for Moore neighborhoods.
 
 Income is continuous. An agent is satisfied with a neighbor's income if the difference between their incomes is lower than a threshold. For incomes in [100, 100k], difference 30k for satisfaction, Moore neighborhoods, it took 1863 to reach 0.9 average city satisfaction threshold (see `avg_satisfaction.png` and `income.gif`).
+
+If the .gifs are not playing convert to mp4 using `ffmpeg -i income.gif -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" income.mp4
+`
