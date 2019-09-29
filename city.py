@@ -3,11 +3,12 @@ import sys
 
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
 
 # Max iterations
-max_iterations = 100
+max_iterations = 2000
 satisfaction_threshold = 0.9
 
 # Width and height of the city grid
@@ -28,6 +29,9 @@ price_noise = 0.3
 # weight of extreme prices, if 0 prices will be evenly distributed
 price_segregation = 0.1
 
+# Importance of religion, ethnicity and income respectively for each agent
+weight_list = [0, 0, 1]
+
 # Ratio of empty houses
 empty_ratio = 0.05
 
@@ -47,6 +51,7 @@ class Home:
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
+
     return [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
              for j in range(columnNumber - 1 - radius, columnNumber + radius)]
             for i in range(rowNumber - 1 - radius, rowNumber + radius)]
@@ -90,8 +95,8 @@ def generate_city():
                 a = Agent(religion=CategoricalFeature(value=random.randint(1, 9),
                                                       preference_matrix=religion_preference_matrix),
                           ethnicity=BinaryFeature(value=eth),
-                          income=RealNumberFeature(value=random.randint(min_income, max_income)),
-                          weights=[0, 1, 0])
+                          income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=30000),
+                          weights=weight_list)
             else:
                 a = None
             # Generating a home with a price depending on its location and its address
@@ -143,16 +148,69 @@ flatten = lambda l: [item for sublist in l for item in sublist]
 if __name__ == "__main__":
     city = generate_city()
 
-    data = np.zeros((h + 2, w + 2, 3), dtype=np.uint8)
+    data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
 
     # sys.stdout = open("out.csv", "w")
 
+    avg_satisfaction_over_time = []
+
+    frames_religion = []
+    frames_ethnicity = []
+    frames_income = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
-            print(f"Average agent satisfaction is above {satisfaction_threshold}")
+            print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
             break
+
+        # Plot incomes
+        for (x, y), house in np.ndenumerate(city):
+            if x > w or y > h:
+                continue
+            if not house.empty:
+                # equation of a line through 2 points (min_income, 0) and (max_income,255)
+                color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
+                data[x][y] = [color, 255, color]
+            else:
+                data[x][y] = [0, 0, 0]
+
+        img = Image.fromarray(data, 'RGB')
+
+        # Upscale image so it's easier to see
+        img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+
+        frames_income.append(img)
+
+        # Plot ethnicities
+        for (x, y), house in np.ndenumerate(city):
+            if x > w or y > h:
+                continue
+            if not house.empty:
+                if house.occupant.ethnicity.value:
+                    data[x][y] = [128, 128, 255]
+                else:
+                    data[x][y] = [255, 255, 255]
+            else:
+                data[x][y] = [0, 0, 0]
+
+        img = Image.fromarray(data, 'RGB')
+
+        # Upscale image so it's easier to see
+        img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+        frames_ethnicity.append(img)
+
+        avg_satisfaction_over_time.append(avg_satisfaction)
+
+    plt.plot(avg_satisfaction_over_time)
+    plt.title("Average satisfaction over time")
+    plt.xlabel("Number of steps")
+    plt.ylabel("Average satisfaction of all agents")
+    plt.savefig("avg_satisfaction")
+    print(f"average satisfaction: {avg_satisfaction}")
+
+    frames_ethnicity[0].save('ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=50, loop=0)
+    frames_income[0].save('income.gif', append_images=frames_income[1:], save_all=True, duration=50, loop=0)
 
     # Plot house prices
     for (x, y), house in np.ndenumerate(city):
@@ -168,39 +226,4 @@ if __name__ == "__main__":
 
     # Upscale image so it's easier to see
     img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.show(title="Prices")
-
-    # Plot incomes
-    for (x, y), house in np.ndenumerate(city):
-        if x > w or y > h:
-            continue
-        if not house.empty:
-            # equation of a line through 2 points (min_income, 0) and (max_income,255)
-            color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
-            data[x][y] = [color, 255, color]
-        else:
-            data[x][y] = [0, 0, 0]
-
-    img = Image.fromarray(data, 'RGB')
-
-    # Upscale image so it's easier to see
-    img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.show(title="Incomes")
-
-    # Plot ethnicities
-    for (x, y), house in np.ndenumerate(city):
-        if x > w or y > h:
-            continue
-        if not house.empty:
-            if house.occupant.ethnicity.value:
-                data[x][y] = [128, 128, 255]
-            else:
-                data[x][y] = [255, 255, 255]
-        else:
-            data[x][y] = [0, 0, 0]
-
-    img = Image.fromarray(data, 'RGB')
-
-    # Upscale image so it's easier to see
-    img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.show(title="Etnicities")
+    img.save("house_prices.png")
