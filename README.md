@@ -16,7 +16,7 @@ To run this, first install all dependencies with `pip install -r requirements.tx
 
 By changing the `weight_list` global variable, we can notice segregation by the highest weighted feature. It has been tested for ethnicity 1, others 0 and for income 1, others 0.
 
-For the sake of diversity, religion and ethnicity have been modeled differently. Religion is n-categorical while ethnicity is binary. For ethnicity, a high average city satisfaction threshold is easy to reach, taking ~20 steps for Moore neighborhoods.
+For the sake of diversity, religion and ethnicity have been modeled differently. Religion is n-categorical while ethnicity is binary. For ethnicity, a high average city satisfaction threshold is easy to reach, taking ~20 steps for Moore neighborhoods (see `ethnicities.gif`).
 
 Income is continuous. An agent is satisfied with a neighbor's income if the difference between their incomes is lower than a threshold. For incomes in [100, 100k], difference 30k for satisfaction, Moore neighborhoods, it took 1863 to reach 0.9 average city satisfaction threshold (see `avg_satisfaction.png` and `income.gif`).
 
