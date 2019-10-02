@@ -30,7 +30,7 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 0, 1]
+weight_list = [0, 1, 0]
 
 # Ratio of empty houses
 empty_ratio = 0.05
@@ -51,7 +51,6 @@ class Home:
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
-
     return [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
              for j in range(columnNumber - 1 - radius, columnNumber + radius)]
             for i in range(rowNumber - 1 - radius, rowNumber + radius)]
@@ -124,18 +123,29 @@ def time_step(i):
             city_satisfactions.append(int(satisfaction[0]))
             if not satisfaction[0]:
                 if i == max_iterations - 100:
-                    print(
-                        f"{str(x)}, {str(y)}, {str(agent)}, not satisfied, {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
-                # Move the agent to a random empty house
+                    print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
+                          f" {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
+                # Move the agent to a random empty house that they are satisfied with
+                # first build a list of prospects
                 prospects = []
                 for (xm, ym), housem in np.ndenumerate(city):
                     if housem.empty:
-                        prospects.append((xm, ym))
-                target_house = city[random.choice(prospects)]
-                target_house.occupant = house.occupant
-                target_house.empty = False
-                house.occupant = None
-                house.empty = True
+                        # checking if prospect is satisfying
+                        p_neighboring_houses = flatten(neighbors(city, xm, ym, 1))
+                        p_neighboring_houses = list(filter(None.__ne__, p_neighboring_houses))
+                        p_house_neighbors = []
+                        # Only take into account neighbors from non-empty houses
+                        for hs in p_neighboring_houses:
+                            if not hs.empty:
+                                p_house_neighbors.append(hs.occupant)
+                        if agent.satisfied(p_house_neighbors)[0]:
+                            prospects.append((xm, ym))
+                if prospects:  # if list is not empty, move to a random element
+                    target_house = city[random.choice(prospects)]
+                    target_house.occupant = house.occupant
+                    target_house.empty = False
+                    house.occupant = None
+                    house.empty = True
             else:
                 if i == max_iterations - 100:
                     print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
@@ -206,11 +216,12 @@ if __name__ == "__main__":
     plt.title("Average satisfaction over time")
     plt.xlabel("Number of steps")
     plt.ylabel("Average satisfaction of all agents")
-    plt.savefig("avg_satisfaction")
+    plt.savefig("out/avg_satisfaction.png")
     print(f"average satisfaction: {avg_satisfaction}")
 
-    frames_ethnicity[0].save('ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=50, loop=0)
-    frames_income[0].save('income.gif', append_images=frames_income[1:], save_all=True, duration=50, loop=0)
+    frames_ethnicity[0].save('out/ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=200,
+                             loop=0)
+    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=0)
 
     # Plot house prices
     for (x, y), house in np.ndenumerate(city):
@@ -226,4 +237,4 @@ if __name__ == "__main__":
 
     # Upscale image so it's easier to see
     img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.save("house_prices.png")
+    img.save("out/house_prices.png")

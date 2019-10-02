@@ -119,7 +119,7 @@ if __name__ == "__main__":
                         ethnicity=BinaryFeature(value=random.choice([True, False])),
                         income=RealNumberFeature(value=random.randint(0, 100), threshold=20)) for _ in range(0, 100)]
     print([str(x) for x in agent_list])
-    sys.stdout = open("out.csv", "w")
+    sys.stdout = open("out/out.csv", "w")
     for index, agent in enumerate(agent_list[1:]):
         # Check whether an agent is satisfied with their neighbors
         satisfaction = agent.satisfied([agent_list[index - 1], agent_list[index + 1]])
