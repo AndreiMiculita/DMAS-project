@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
 
 # Max iterations
-max_iterations = 2000
+max_iterations = 50
 satisfaction_threshold = 0.9
 
 # Width and height of the city grid
@@ -30,7 +30,7 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 1, 0]
+weight_list = [0, 0, 1]
 
 # Ratio of empty houses
 empty_ratio = 0.05
@@ -121,8 +121,9 @@ def time_step(i):
             agent = house.occupant
             satisfaction = agent.satisfied(house_neighbors)
             city_satisfactions.append(int(satisfaction[0]))
+            # If the agent is not satisfied with their current position, try to move
             if not satisfaction[0]:
-                if i == max_iterations - 100:
+                if i == max_iterations - 1:
                     print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
                           f" {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
                 # Move the agent to a random empty house that they are satisfied with
@@ -147,7 +148,7 @@ def time_step(i):
                     house.occupant = None
                     house.empty = True
             else:
-                if i == max_iterations - 100:
+                if i == max_iterations - 1:
                     print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
 
     return np.average(city_satisfactions)
@@ -158,6 +159,7 @@ flatten = lambda l: [item for sublist in l for item in sublist]
 if __name__ == "__main__":
     city = generate_city()
 
+    # Bitmap for the gifs
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
 
     # sys.stdout = open("out.csv", "w")
@@ -169,10 +171,6 @@ if __name__ == "__main__":
     frames_income = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
-        avg_satisfaction = time_step(i)
-        if avg_satisfaction > satisfaction_threshold:
-            print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
-            break
 
         # Plot incomes
         for (x, y), house in np.ndenumerate(city):
@@ -209,6 +207,11 @@ if __name__ == "__main__":
         # Upscale image so it's easier to see
         img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
         frames_ethnicity.append(img)
+
+        avg_satisfaction = time_step(i)
+        if avg_satisfaction > satisfaction_threshold:
+            print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
+            break
 
         avg_satisfaction_over_time.append(avg_satisfaction)
 
