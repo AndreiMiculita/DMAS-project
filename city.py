@@ -30,13 +30,15 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 0, 1]
+weight_list = [0, 1, 0]
 
 # Ratio of empty houses
 empty_ratio = 0.05
 
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
+
+check_future_home = False
 
 
 class Home:
@@ -131,16 +133,20 @@ def time_step(i):
                 prospects = []
                 for (xm, ym), housem in np.ndenumerate(city):
                     if housem.empty:
-                        # checking if prospect is satisfying
-                        p_neighboring_houses = flatten(neighbors(city, xm, ym, 1))
-                        p_neighboring_houses = list(filter(None.__ne__, p_neighboring_houses))
-                        p_house_neighbors = []
-                        # Only take into account neighbors from non-empty houses
-                        for hs in p_neighboring_houses:
-                            if not hs.empty:
-                                p_house_neighbors.append(hs.occupant)
-                        if agent.satisfied(p_house_neighbors)[0]:
+                        # In some cases we want them to not check the future home, and move randomly
+                        if not check_future_home:
                             prospects.append((xm, ym))
+                        else:
+                            # checking if prospect is satisfying
+                            p_neighboring_houses = flatten(neighbors(city, xm, ym, 1))
+                            p_neighboring_houses = list(filter(None.__ne__, p_neighboring_houses))
+                            p_house_neighbors = []
+                            # Only take into account neighbors from non-empty houses
+                            for hs in p_neighboring_houses:
+                                if not hs.empty:
+                                    p_house_neighbors.append(hs.occupant)
+                            if agent.satisfied(p_house_neighbors)[0]:
+                                prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
                     target_house.occupant = house.occupant
