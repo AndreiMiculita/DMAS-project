@@ -1,11 +1,11 @@
 import random
-import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
 
-from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
+from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, religion_preference_matrix
+from home import Home
 
 # Max iterations
 max_iterations = 100
@@ -40,16 +40,6 @@ zoom = 10
 
 # Whether an agent checks their future neighbors before moving to a house
 check_future_home = False
-
-
-class Home:
-    def __init__(self, price, empty: bool, occupant: Agent):
-        self.price = price
-        self.empty = empty
-        self.occupant = occupant
-
-    def __str__(self):
-        return str(self.price)
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
