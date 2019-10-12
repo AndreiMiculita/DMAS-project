@@ -10,6 +10,7 @@ from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, R
 # Max iterations
 max_iterations = 50
 satisfaction_threshold = 0.9
+agent_satisfaction_threshold = 0.3
 
 # Width and height of the city grid
 w, h = 16, 16
@@ -30,7 +31,8 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 1, 0]
+## sum should be = 1
+weight_list = [.1, .8, .1]
 
 # Ratio of empty houses
 empty_ratio = 0.05
@@ -52,13 +54,14 @@ class Home:
         return str(self.price)
 
 
-def neighbors(a, radius, rowNumber, columnNumber):
+def neighbors(a, rowNumber, columnNumber, radius): # parameter order was incorrect
     return [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
              for j in range(columnNumber - 1 - radius, columnNumber + radius)]
             for i in range(rowNumber - 1 - radius, rowNumber + radius)]
 
 
 def generate_city():
+    #print("hello")
     # City is a matrix with a padding
     grid = np.zeros((w + 2, h + 2), dtype=object)
     for x in range(-2, w + 2):
@@ -98,36 +101,66 @@ def generate_city():
                           ethnicity=BinaryFeature(value=eth),
                           income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=30000),
                           weights=weight_list)
+               # print("agent: ", a.ethnicity.value)
             else:
                 a = None
             # Generating a home with a price depending on its location and its address
             grid[x][y] = Home(price=price, address=(x, y), empty=empty, occupant=a)
     return grid
 
+###----------------------------------------------------
+def happiness(x, y, city, radius, agent):
 
+    neighbour_count = 0
+    ethnicity_satisfaction = 0
+    religion_satisfaction = 0
+    income_satisfaction = 0
+    neighboring_houses = flatten(neighbors(city, x, y, radius))
+    neighboring_houses = list(filter(None.__ne__, neighboring_houses))
+    house_neighbors = []
+    for hs in neighboring_houses:
+        if not agent == hs.occupant:
+            if not hs.empty:
+                neighbour_count += 1
+                #non-binary, use preference matrix
+                religion_satisfaction += int(religion_preference_matrix[agent.religion.value-1][hs.occupant.religion.value-1])
+                #binary, so just add up all matches
+                if agent.ethnicity.value == hs.occupant.ethnicity.value:
+                    ethnicity_satisfaction += 1
+                #continuous, use difference
+                income_satisfaction += min(agent.income.value, hs.occupant.income.value) / max(agent.income.value, hs.occupant.income.value)
+                house_neighbors.append(hs.occupant)
+    #no neighbours leads to total dissatisfaction
+    if neighbour_count == 0:
+        total_satisfaction = 0
+    else:
+        #TODO: maybe we need different ways to measure individual happiness scores
+        religion_score = religion_satisfaction / neighbour_count
+        ethnicity_score = ethnicity_satisfaction / neighbour_count    
+        income_score = income_satisfaction / neighbour_count
+        total_satisfaction = religion_score* weight_list[0] + ethnicity_score*weight_list[1] + income_score*weight_list[2]
+    #print("total: ", total_satisfaction)
+    return total_satisfaction
+    
 def time_step(i):
     if i % 100 == 0:
         print(i)
     city_satisfactions = []
+	#happy = happiness_measure()
     # Go through the entire city to check whether occupants are satisfied
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
         if not house.empty:
-            neighboring_houses = flatten(neighbors(city, x, y, 1))
-            neighboring_houses = list(filter(None.__ne__, neighboring_houses))
-            house_neighbors = []
-            # Only take into account neighbors from non-empty houses
-            for hs in neighboring_houses:
-                if not hs.empty:
-                    house_neighbors.append(hs.occupant)
             agent = house.occupant
-            satisfaction = agent.satisfied(house_neighbors)
-            city_satisfactions.append(int(satisfaction[0]))
-            # If the agent is not satisfied with their current position, try to move
-            if not satisfaction[0]:
-                if i == max_iterations - 1:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
-                          f" {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
+            satisfaction = happiness(x,y,city, 1, agent)
+            if satisfaction <= agent_satisfaction_threshold:
+                city_satisfactions.append(0)
+            else:
+                city_satisfactions.append(1)
+            if satisfaction <= agent_satisfaction_threshold:
+#                if i == max_iterations - 1:
+ #                   print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
+  #                        f" {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
                 # Move the agent to a random empty house that they are satisfied with
                 # first build a list of prospects
                 prospects = []
@@ -136,6 +169,8 @@ def time_step(i):
                         # In some cases we want them to not check the future home, and move randomly
                         if not check_future_home:
                             prospects.append((xm, ym))
+                        #TODO: get check future home to work as well
+                        """    
                         else:
                             # checking if prospect is satisfying
                             p_neighboring_houses = flatten(neighbors(city, xm, ym, 1))
@@ -147,16 +182,22 @@ def time_step(i):
                                     p_house_neighbors.append(hs.occupant)
                             if agent.satisfied(p_house_neighbors)[0]:
                                 prospects.append((xm, ym))
+                        """
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
                     target_house.occupant = house.occupant
                     target_house.empty = False
                     house.occupant = None
                     house.empty = True
-            else:
-                if i == max_iterations - 1:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
-
+ #           else:
+  #              if i == max_iterations - 1:
+   #                 print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
+    print("satisfaction")
+    print(satisfaction)
+    print("agent2")
+    print(agent)
+    print("city satisfaction")
+    print(city_satisfactions)
     return np.average(city_satisfactions)
 
 
@@ -164,11 +205,10 @@ flatten = lambda l: [item for sublist in l for item in sublist]
 
 if __name__ == "__main__":
     city = generate_city()
-
     # Bitmap for the gifs
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
 
-    # sys.stdout = open("out.csv", "w")
+    #sys.stdout = open("out.csv", "w")
 
     avg_satisfaction_over_time = []
 
@@ -177,6 +217,7 @@ if __name__ == "__main__":
     frames_income = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
+        print(i)
 
         # Plot incomes
         for (x, y), house in np.ndenumerate(city):
@@ -220,7 +261,6 @@ if __name__ == "__main__":
             break
 
         avg_satisfaction_over_time.append(avg_satisfaction)
-
     plt.plot(avg_satisfaction_over_time)
     plt.title("Average satisfaction over time")
     plt.xlabel("Number of steps")
