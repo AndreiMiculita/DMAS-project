@@ -43,10 +43,10 @@ zoom = 10
 check_future_home = True
 
 
-def neighbors(a, radius, rowNumber, columnNumber):
+def neighbors(a, radius, rowNumber, columnNumber, agent):
     house_neighbors = []
-    for i in range(rowNumber - 1 - radius, rowNumber + radius):
-        for j in range(columnNumber - 1 - radius, columnNumber + radius):
+    for i in range(rowNumber - radius, rowNumber + radius):
+        for j in range(columnNumber - radius, columnNumber + radius):
             if 0 <= i < len(a) and 0 <= j < len(a[0]):
                 if not a[i][j].empty:
                     house_neighbors.append(a[i][j].occupant)
@@ -109,8 +109,8 @@ def time_step(i):
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
         if not house.empty:
-            house_neighbors = neighbors(city, 1, x, y)
             agent = house.occupant
+            house_neighbors = neighbors(city, 1, x, y, agent)
             satisfaction = agent.satisfied(house_neighbors)
             city_satisfactions.append(int(satisfaction > 0.5))
             # If the agent is not satisfied with their current position, try to move
@@ -128,7 +128,7 @@ def time_step(i):
                             prospects.append((xm, ym))
                         else:
                             # checking if prospect is satisfying
-                            p_house_neighbors = neighbors(city, 1, xm, ym)
+                            p_house_neighbors = neighbors(city, 1, xm, ym, agent)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
