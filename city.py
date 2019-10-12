@@ -30,7 +30,7 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 1, 0]
+weight_list = [0, 0, 1]
 
 # Ratio of empty houses
 empty_ratio = 0.05
@@ -43,9 +43,8 @@ check_future_home = False
 
 
 class Home:
-    def __init__(self, price, address, empty: bool, occupant: Agent):
+    def __init__(self, price, empty: bool, occupant: Agent):
         self.price = price
-        self.address = address
         self.empty = empty
         self.occupant = occupant
 
@@ -109,8 +108,8 @@ def generate_city():
                           weights=weight_list)
             else:
                 a = None
-            # Generating a home with a price depending on its location and its address
-            grid[x][y] = Home(price=price, address=(x, y), empty=empty, occupant=a)
+            # Generating a home with a price depending on its location
+            grid[x][y] = Home(price=price, empty=empty, occupant=a)
     return grid
 
 
