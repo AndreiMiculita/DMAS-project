@@ -38,6 +38,7 @@ empty_ratio = 0.05
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
+# Whether an agent checks their future neighbors before moving to a house
 check_future_home = False
 
 
@@ -53,9 +54,16 @@ class Home:
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
-    return [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
-             for j in range(columnNumber - 1 - radius, columnNumber + radius)]
-            for i in range(rowNumber - 1 - radius, rowNumber + radius)]
+    neighbor_houses = [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
+                        for j in range(columnNumber - 1 - radius, columnNumber + radius)]
+                       for i in range(rowNumber - 1 - radius, rowNumber + radius)]
+    # flatten matrix to list and remove None
+    neighbor_houses = list(filter(None.__ne__, flatten(neighbor_houses)))
+    house_neighbors = []
+    for hs in neighbor_houses:
+        if not hs.empty:
+            house_neighbors.append(hs.occupant)
+    return house_neighbors
 
 
 def generate_city():
@@ -113,13 +121,7 @@ def time_step(i):
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
         if not house.empty:
-            neighboring_houses = flatten(neighbors(city, x, y, 1))
-            neighboring_houses = list(filter(None.__ne__, neighboring_houses))
-            house_neighbors = []
-            # Only take into account neighbors from non-empty houses
-            for hs in neighboring_houses:
-                if not hs.empty:
-                    house_neighbors.append(hs.occupant)
+            house_neighbors = neighbors(city, x, y, 1)
             agent = house.occupant
             satisfaction = agent.satisfied(house_neighbors)
             city_satisfactions.append(int(satisfaction[0]))
@@ -138,13 +140,7 @@ def time_step(i):
                             prospects.append((xm, ym))
                         else:
                             # checking if prospect is satisfying
-                            p_neighboring_houses = flatten(neighbors(city, xm, ym, 1))
-                            p_neighboring_houses = list(filter(None.__ne__, p_neighboring_houses))
-                            p_house_neighbors = []
-                            # Only take into account neighbors from non-empty houses
-                            for hs in p_neighboring_houses:
-                                if not hs.empty:
-                                    p_house_neighbors.append(hs.occupant)
+                            p_house_neighbors = neighbors(city, xm, ym, 1)
                             if agent.satisfied(p_house_neighbors)[0]:
                                 prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
