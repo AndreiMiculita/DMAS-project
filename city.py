@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, Religion, religion_preference_matrix
 
 # Max iterations
-max_iterations = 50
+max_iterations = 100
 satisfaction_threshold = 0.9
 
 # Width and height of the city grid
@@ -122,7 +122,7 @@ def time_step(i):
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
         if not house.empty:
-            house_neighbors = neighbors(city, x, y, 1)
+            house_neighbors = neighbors(city, 2, x, y)
             agent = house.occupant
             satisfaction = agent.satisfied(house_neighbors)
             city_satisfactions.append(satisfaction)
@@ -141,7 +141,7 @@ def time_step(i):
                             prospects.append((xm, ym))
                         else:
                             # checking if prospect is satisfying
-                            p_house_neighbors = neighbors(city, xm, ym, 1)
+                            p_house_neighbors = neighbors(city, 1, xm, ym)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
