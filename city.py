@@ -8,7 +8,8 @@ from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, r
 from home import Home
 
 # Max iterations
-max_iterations = 100
+max_iterations = 30
+# Simulation stop
 satisfaction_threshold = 0.9
 
 # Width and height of the city grid
@@ -30,29 +31,26 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0, 0, 1]
+weight_list = [0, 1, 0]
 
 # Ratio of empty houses
-empty_ratio = 0.05
+empty_ratio = 0.1
 
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
 # Whether an agent checks their future neighbors before moving to a house
-check_future_home = False
+check_future_home = True
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
-    flatten = lambda l: [item for sublist in l for item in sublist]
-    neighbor_houses = [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
-                        for j in range(columnNumber - 1 - radius, columnNumber + radius)]
-                       for i in range(rowNumber - 1 - radius, rowNumber + radius)]
-    # flatten matrix to list and remove None
-    neighbor_houses = list(filter(None.__ne__, flatten(neighbor_houses)))
     house_neighbors = []
-    for hs in neighbor_houses:
-        if not hs.empty:
-            house_neighbors.append(hs.occupant)
+    for i in range(rowNumber - 1 - radius, rowNumber + radius):
+        for j in range(columnNumber - 1 - radius, columnNumber + radius):
+            if 0 <= i < len(a) and 0 <= j < len(a[0]):
+                if not a[i][j].empty:
+                    house_neighbors.append(a[i][j].occupant)
+    print(len(house_neighbors))
     return house_neighbors
 
 
@@ -111,10 +109,10 @@ def time_step(i):
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
         if not house.empty:
-            house_neighbors = neighbors(city, 2, x, y)
+            house_neighbors = neighbors(city, 1, x, y)
             agent = house.occupant
             satisfaction = agent.satisfied(house_neighbors)
-            city_satisfactions.append(satisfaction)
+            city_satisfactions.append(int(satisfaction > 0.5))
             # If the agent is not satisfied with their current position, try to move
             if not satisfaction > 0.5:
                 if i == max_iterations - 1:
@@ -213,8 +211,8 @@ if __name__ == "__main__":
     print(f"average satisfaction: {avg_satisfaction}")
 
     frames_ethnicity[0].save('out/ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=200,
-                             loop=0)
-    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=0)
+                             loop=1)
+    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
 
     # Plot house prices
     for (x, y), house in np.ndenumerate(city):
