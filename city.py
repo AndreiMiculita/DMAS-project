@@ -125,12 +125,12 @@ def time_step(i):
             house_neighbors = neighbors(city, x, y, 1)
             agent = house.occupant
             satisfaction = agent.satisfied(house_neighbors)
-            city_satisfactions.append(int(satisfaction[0]))
+            city_satisfactions.append(satisfaction)
             # If the agent is not satisfied with their current position, try to move
-            if not satisfaction[0]:
+            if not satisfaction > 0.5:
                 if i == max_iterations - 1:
                     print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
-                          f" {', '.join(map(str, satisfaction[1]))}, {satisfaction[2]}")
+                          f" {satisfaction}")
                 # Move the agent to a random empty house that they are satisfied with
                 # first build a list of prospects
                 prospects = []
@@ -142,7 +142,7 @@ def time_step(i):
                         else:
                             # checking if prospect is satisfying
                             p_house_neighbors = neighbors(city, xm, ym, 1)
-                            if agent.satisfied(p_house_neighbors)[0]:
+                            if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
@@ -152,7 +152,7 @@ def time_step(i):
                     house.empty = True
             else:
                 if i == max_iterations - 1:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {', '.join(map(str, satisfaction[1]))}")
+                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
 
     return np.average(city_satisfactions)
 

@@ -99,12 +99,7 @@ class Agent:
 
         # Returns a list where the first element is whether they're satisfied or not, and the 2nd element
         # is a list containing the individual satisfactions
-        return [self.satisfaction >= self.satisfaction_threshold,
-                np.array([avg_neighbor_religion_satisfaction,
-                          avg_neighbor_ethnicity_satisfaction,
-                          avg_neighbor_income_satisfaction]),
-                neighbor_ethnicity_satisfactions
-               ]
+        return self.satisfaction
 
     def __str__(self):
         return str(id(self)) + ", " + \
