@@ -54,6 +54,7 @@ class Home:
 
 
 def neighbors(a, radius, rowNumber, columnNumber):
+    flatten = lambda l: [item for sublist in l for item in sublist]
     neighbor_houses = [[a[i][j] if 0 <= i < len(a) and 0 <= j < len(a[0]) else None
                         for j in range(columnNumber - 1 - radius, columnNumber + radius)]
                        for i in range(rowNumber - 1 - radius, rowNumber + radius)]
@@ -155,8 +156,6 @@ def time_step(i):
 
     return np.average(city_satisfactions)
 
-
-flatten = lambda l: [item for sublist in l for item in sublist]
 
 if __name__ == "__main__":
     city = generate_city()
