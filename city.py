@@ -40,17 +40,23 @@ empty_ratio = 0.1
 zoom = 10
 
 # Whether an agent checks their future neighbors before moving to a house
-check_future_home = True
+check_future_home = False
 
 
 def neighbors(a, radius, rowNumber, columnNumber, agent):
     house_neighbors = []
-    for i in range(rowNumber - radius, rowNumber + radius):
-        for j in range(columnNumber - radius, columnNumber + radius):
+    # empty = 0
+    # print(rowNumber, columnNumber, end="")
+    for i in range(rowNumber - radius, rowNumber + radius + 1):
+        for j in range(columnNumber - radius, columnNumber + radius + 1):
             if 0 <= i < len(a) and 0 <= j < len(a[0]):
-                if not a[i][j].empty:
+                if not a[i][j].empty and a[i][j].occupant != agent:
                     house_neighbors.append(a[i][j].occupant)
-    print(len(house_neighbors))
+                #     print("neighbor", i, j, end="")
+                # else:
+                    # empty+=1
+                    # print("empty", i, j, end="")
+    # print("neighbors: ", len(house_neighbors), "empty: ", empty)
     return house_neighbors
 
 
