@@ -144,11 +144,66 @@ def time_step(i):
     return np.average(city_satisfactions)
 
 
+def get_frame(city):
+    data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
+
+    # Plot incomes
+    for (x, y), house in np.ndenumerate(city):
+        if x > w or y > h:
+            continue
+        if not house.empty:
+            # equation of a line through 2 points (min_income, 0) and (max_income,255)
+            color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
+            data[x][y] = [color, 255, color]
+        else:
+            data[x][y] = [0, 0, 0]
+
+    img_income = Image.fromarray(data, 'RGB')
+
+    # Upscale image so it's easier to see
+    img_income = img_income.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+
+
+    # Plot ethnicities
+    for (x, y), house in np.ndenumerate(city):
+        if x > w or y > h:
+            continue
+        if not house.empty:
+            if house.occupant.ethnicity.value:
+                data[x][y] = [128, 128, 255]
+            else:
+                data[x][y] = [255, 255, 255]
+        else:
+            data[x][y] = [0, 0, 0]
+
+    img_ethnicity = Image.fromarray(data, 'RGB')
+    # Upscale image so it's easier to see
+    img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+
+    return img_income, img_ethnicity
+
+
 if __name__ == "__main__":
     city = generate_city()
 
     # Bitmap for the gifs
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
+
+    # Plot house prices
+    for (x, y), house in np.ndenumerate(city):
+        if x > w or y > h:
+            continue
+        if not house.empty:
+            color = house.price / max_price * 255
+            data[x][y] = [255, color, color]
+        else:
+            data[x][y] = [0, 0, 0]
+
+    img = Image.fromarray(data, 'RGB')
+
+    # Upscale image so it's easier to see
+    img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+    img.save("out/house_prices.png")
 
     # sys.stdout = open("out.csv", "w")
 
@@ -159,42 +214,9 @@ if __name__ == "__main__":
     frames_income = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
-
-        # Plot incomes
-        for (x, y), house in np.ndenumerate(city):
-            if x > w or y > h:
-                continue
-            if not house.empty:
-                # equation of a line through 2 points (min_income, 0) and (max_income,255)
-                color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
-                data[x][y] = [color, 255, color]
-            else:
-                data[x][y] = [0, 0, 0]
-
-        img = Image.fromarray(data, 'RGB')
-
-        # Upscale image so it's easier to see
-        img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-
-        frames_income.append(img)
-
-        # Plot ethnicities
-        for (x, y), house in np.ndenumerate(city):
-            if x > w or y > h:
-                continue
-            if not house.empty:
-                if house.occupant.ethnicity.value:
-                    data[x][y] = [128, 128, 255]
-                else:
-                    data[x][y] = [255, 255, 255]
-            else:
-                data[x][y] = [0, 0, 0]
-
-        img = Image.fromarray(data, 'RGB')
-
-        # Upscale image so it's easier to see
-        img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-        frames_ethnicity.append(img)
+        frame_income, frame_ethnicity = get_frame(city)
+        frames_income.append(frame_income)
+        frames_ethnicity.append(frame_ethnicity)
 
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
@@ -214,18 +236,3 @@ if __name__ == "__main__":
                              loop=1)
     frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
 
-    # Plot house prices
-    for (x, y), house in np.ndenumerate(city):
-        if x > w or y > h:
-            continue
-        if not house.empty:
-            color = house.price / max_price * 255
-            data[x][y] = [255, color, color]
-        else:
-            data[x][y] = [0, 0, 0]
-
-    img = Image.fromarray(data, 'RGB')
-
-    # Upscale image so it's easier to see
-    img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.save("out/house_prices.png")
