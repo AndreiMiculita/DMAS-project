@@ -1,3 +1,4 @@
+import os
 import random
 
 import matplotlib.pyplot as plt
@@ -200,6 +201,7 @@ def get_frame(city):
 
 if __name__ == "__main__":
     city = generate_city()
+    os.makedirs("out", exist_ok=True)
 
     # Bitmap for the gifs
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
