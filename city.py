@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 
 from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, religion_preference_matrix
+from landmark import Landmark, CategoricalFeature, religion_preference_matrix
 from home import Home
 
 # Max iterations
@@ -35,6 +36,9 @@ weight_list = [0, 1, 0]
 
 # Ratio of empty houses
 empty_ratio = 0.1
+
+# Ratio of landmarks
+landmark_ratio = 0.01
 
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
@@ -89,32 +93,45 @@ def generate_city():
             else:
                 price = (price + max_price * price_segregation) / (1 + price_segregation)
 
-            # 1 in 10 probability of an empty house
+            # 1 in 10 probability of an empty house, 1 in 100 for a landmark. Landmark takes priority over empty
             empty = random.randint(1, 1 / empty_ratio) == 1
+            landmark = random.randint(1, 1 / landmark_ratio) == 1
+            if landmark:
+                empty = 0
 
-            if not empty:
+            # If both empty and landmark are false, make an agent
+            if not empty or not landmark:
                 # Creating a random agent that lives in that home
                 eth = (random.randint(1, 2) == 1)
                 a = Agent(religion=CategoricalFeature(value=random.randint(1, 9),
                                                       preference_matrix=religion_preference_matrix),
                           ethnicity=BinaryFeature(value=eth),
                           income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=30000),
+                          landmark=0,
                           weights=weight_list)
-            else:
+            # If empty is true, make the space empty
+            elif empty:
                 a = None
+            # Lastly if not empty and landmark is true, make a landmark of a random religion
+            else:
+                a = Landmark(religion=CategoricalFeature(value=random.randint(1, 9),
+                                                         preference_matrix=religion_preference_matrix),
+                             landmark=1)
+
             # Generating a home with a price depending on its location
-            grid[x][y] = Home(price=price, empty=empty, occupant=a)
+            grid[x][y] = Home(price=price, empty=empty, landmark=landmark, occupant=a)
     return grid
 
 
 def time_step(i):
     if i % 100 == 0:
         print(i)
+
     city_satisfactions = []
     # Go through the entire city to check whether occupants are satisfied
     for (x, y), house in np.ndenumerate(city):
         # Skip edge for now
-        if not house.empty:
+        if not (house.empty or house.landmark):
             agent = house.occupant
             house_neighbors = neighbors(city, 1, x, y, agent)
             satisfaction = agent.satisfied(house_neighbors)
@@ -157,10 +174,12 @@ def get_frame(city):
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
-        if not house.empty:
+        if not (house.empty or house.landmark):
             # equation of a line through 2 points (min_income, 0) and (max_income,255)
             color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
             data[x][y] = [color, 255, color]
+        elif house.landmark:
+            data[x][y] = [255, 255, 0]
         else:
             data[x][y] = [0, 0, 0]
 
@@ -174,11 +193,13 @@ def get_frame(city):
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
-        if not house.empty:
+        if not (house.empty or house.landmark):
             if house.occupant.ethnicity.value:
                 data[x][y] = [128, 128, 255]
             else:
                 data[x][y] = [255, 255, 255]
+        elif house.landmark:
+            data[x][y] = [255, 255, 0]
         else:
             data[x][y] = [0, 0, 0]
 
@@ -199,9 +220,11 @@ if __name__ == "__main__":
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
-        if not house.empty:
+        if not (house.empty or house.landmark):
             color = house.price / max_price * 255
             data[x][y] = [255, color, color]
+        elif house.landmark:
+            data[x][y] = [255, 255, 0]
         else:
             data[x][y] = [0, 0, 0]
 

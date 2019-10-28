@@ -68,7 +68,7 @@ class BinaryFeature(object):
 class Agent:
     satisfaction_threshold = 0.5
 
-    def __init__(self, religion: CategoricalFeature, ethnicity: BinaryFeature, income: RealNumberFeature,
+    def __init__(self, religion: CategoricalFeature, ethnicity: BinaryFeature, income: RealNumberFeature, landmark,
                  weights=None):
         self.religion = religion
         self.ethnicity = ethnicity
@@ -77,20 +77,28 @@ class Agent:
         if weights is None:
             weights = [0, 1, 0]
         self.weights = weights
+        self.landmark = landmark
 
     # Whether an agent is satisfied with their current position
     def satisfied(self, neighbors):
         # First put all the satisfactions in arrays, for each feature and each neighbor
         # There's probably an even shorter way of doing this in python
         # Use income temporarily
-        neighbor_religion_satisfactions = [self.income.preference(n.income) for n in neighbors]
-        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors]
-        neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors]
+        neighbor_religion_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
+        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors if not n.landmark]
+        neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
 
         # Calculate the average satisfaction for each feature
         avg_neighbor_religion_satisfaction = np.average(neighbor_religion_satisfactions)
         avg_neighbor_ethnicity_satisfaction = np.average(neighbor_ethnicity_satisfactions)
         avg_neighbor_income_satisfaction = np.average(neighbor_income_satisfactions)
+
+        # If there is a landmark within the neighbors that shares a religion with the agent
+        # then maximise religion satisfaction
+        for n in neighbors:
+            if n.landmark:
+                if self.religion.preference(n.religion):
+                    avg_neighbor_religion_satisfaction = 1
 
         # 3 arrays can be treated as a matrix, np.average averages all of the numbers
         self.satisfaction = np.average(a=[avg_neighbor_religion_satisfaction,
