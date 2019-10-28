@@ -97,8 +97,10 @@ class Agent:
         # then maximise religion satisfaction
         for n in neighbors:
             if n.landmark:
-                if self.religion.preference(n.religion):
-                    avg_neighbor_religion_satisfaction = 1
+                print("About to check for landmark religion")
+                #if self.religion.preference(n.religion):
+                    #avg_neighbor_religion_satisfaction = 1
+                    #print("I changed the satisfaction")
 
         # 3 arrays can be treated as a matrix, np.average averages all of the numbers
         self.satisfaction = np.average(a=[avg_neighbor_religion_satisfaction,

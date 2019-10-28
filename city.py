@@ -56,6 +56,7 @@ def neighbors(a, radius, rowNumber, columnNumber, agent):
             if 0 <= i < len(a) and 0 <= j < len(a[0]):
                 if not a[i][j].empty and a[i][j].occupant != agent:
                     house_neighbors.append(a[i][j].occupant)
+
                 #     print("neighbor", i, j, end="")
                 # else:
                     # empty+=1
@@ -113,7 +114,7 @@ def generate_city():
             elif empty:
                 a = None
             # Lastly if not empty and landmark is true, make a landmark of a random religion
-            else:
+            if landmark:
                 a = Landmark(religion=CategoricalFeature(value=random.randint(1, 9),
                                                          preference_matrix=religion_preference_matrix),
                              landmark=1)
