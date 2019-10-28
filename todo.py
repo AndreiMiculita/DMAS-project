@@ -13,6 +13,7 @@
 #Nachi
 #3. Test Range of results for different setups of religion, ethnicities ,(landmark?)
 #More graphs and results
+#Metric for extent of segregation?
 
 # Andrei
 #4. work on moving algorithm
