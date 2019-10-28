@@ -47,7 +47,14 @@ zoom = 10
 check_future_home = False
 
 
+
 def neighbors(a, radius, rowNumber, columnNumber, agent):
+    """Return a list of all the neighbors
+    :param a: city matrix
+    :param radius: maximum chebyshev distance to check
+    :param rowNumber: current row number of house
+    :param columnNumber: current column number of house
+    :param agent: agent living in house"""
     house_neighbors = []
     # empty = 0
     # print(rowNumber, columnNumber, end="")
@@ -56,9 +63,27 @@ def neighbors(a, radius, rowNumber, columnNumber, agent):
             if 0 <= i < len(a) and 0 <= j < len(a[0]):
                 if not a[i][j].empty and a[i][j].occupant != agent:
                     house_neighbors.append(a[i][j].occupant)
-
                 #     print("neighbor", i, j, end="")
                 # else:
+                # empty+=1
+                # print("empty", i, j, end="")
+    # print("neighbors: ", len(house_neighbors), "empty: ", empty)
+    return house_neighbors
+
+
+def neighbors_weighted(a, radius, rowNumber, columnNumber, agent):
+    """Closer neighbors are more important (counted multiple times)"""
+    house_neighbors = []
+    # empty = 0
+    # print(rowNumber, columnNumber, end="")
+    for r in range(1, radius + 1):
+        for i in range(rowNumber - r, rowNumber + r + 1):
+            for j in range(columnNumber - r, columnNumber + r + 1):
+                if 0 <= i < len(a) and 0 <= j < len(a[0]):
+                    if not a[i][j].empty and a[i][j].occupant != agent:
+                        house_neighbors.append(a[i][j].occupant)
+                    #     print("neighbor", i, j, end="")
+                    # else:
                     # empty+=1
                     # print("empty", i, j, end="")
     # print("neighbors: ", len(house_neighbors), "empty: ", empty)
