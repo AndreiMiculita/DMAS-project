@@ -166,18 +166,23 @@ def get_frame(city):
             continue
         if not (house.empty or house.landmark):
             # equation of a line through 2 points (min_income, 0) and (max_income,255)
-            color = (house.occupant.income.value - min_income) * 255 / (max_income - min_income)
+            color = int((house.occupant.income.value - min_income) * 255 / (max_income - min_income))
+            plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=100)
             data[x][y] = [color, 255, color]
         elif house.landmark:
-            data[x][y] = [255, 255, 0]
+            plt.scatter(x,y,c="green",s=100,marker="^")
         else:
-            data[x][y] = [0, 0, 0]
+            plt.scatter(x,y,c="black",s=100)
 
-    img_income = Image.fromarray(data, 'RGB')
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.axis("off")
+
+    canvas = plt.get_current_fig_manager().canvas
+    canvas.draw()
+    img_income = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
 
     # Upscale image so it's easier to see
-    img_income = img_income.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-
+    # img_income = img_income.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
     # Plot ethnicities
     for (x, y), house in np.ndenumerate(city):
@@ -185,17 +190,26 @@ def get_frame(city):
             continue
         if not (house.empty or house.landmark):
             if house.occupant.ethnicity.value:
-                data[x][y] = [128, 128, 255]
+                plt.scatter(x, y, c="red",s=100)
             else:
-                data[x][y] = [255, 255, 255]
+                plt.scatter(x,y,c="blue",s=100)
         elif house.landmark:
-            data[x][y] = [255, 255, 0]
+            plt.scatter(x,y,c="green",s=100,marker="^")
         else:
-            data[x][y] = [0, 0, 0]
+            plt.scatter(x,y,c="black",s=100)
 
-    img_ethnicity = Image.fromarray(data, 'RGB')
+    # for (xm, ym), colorm in np.ndenumerate(data):
+    #     plt.scatter(x, y, c=colorm)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.axis("off")
+
+    canvas = plt.get_current_fig_manager().canvas
+    canvas.draw()
+    img_ethnicity = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
+
+    # img_ethnicity = Image.fromarray(data, 'RGB')
     # Upscale image so it's easier to see
-    img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+    # img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
     # Plot religions
     total_religions = 10
@@ -267,6 +281,7 @@ if __name__ == "__main__":
 
         avg_satisfaction_over_time.append(avg_satisfaction)
 
+    plt.clf()
     plt.plot(avg_satisfaction_over_time)
     plt.title("Average satisfaction over time")
     plt.xlabel("Number of steps")

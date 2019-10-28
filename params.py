@@ -22,7 +22,7 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [1, 0, 0]
+weight_list = [0, 0, 1]
 
 # Ratio of empty houses
 empty_ratio = 0.1
