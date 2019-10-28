@@ -1,3 +1,4 @@
+import colorsys
 import os
 import random
 
@@ -92,7 +93,7 @@ def generate_city():
             if not empty or not landmark:
                 # Creating a random agent that lives in that home
                 eth = (random.randint(1, 2) == 1)
-                a = Agent(religion=CategoricalFeature(value=random.randint(1, 9),
+                a = Agent(religion=CategoricalFeature(value=random.randint(1, 5),
                                                       preference_matrix=religion_preference_matrix),
                           ethnicity=BinaryFeature(value=eth),
                           income=RealNumberFeature(value=random.randint(min_income, max_income), threshold=30000),
@@ -103,7 +104,7 @@ def generate_city():
                 a = None
             # Lastly if not empty and landmark is true, make a landmark of a random religion
             if landmark:
-                a = Landmark(religion=CategoricalFeature(value=random.randint(1, 9),
+                a = Landmark(religion=CategoricalFeature(value=random.randint(1, 5),
                                                          preference_matrix=religion_preference_matrix),
                              landmark=1)
 
@@ -196,7 +197,28 @@ def get_frame(city):
     # Upscale image so it's easier to see
     img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
-    return img_income, img_ethnicity
+    # Plot religions
+    total_religions = 10
+    for (x, y), house in np.ndenumerate(city):
+        if x > w or y > h:
+            continue
+        if not (house.empty or house.landmark):
+            this_religion = house.occupant.religion.value
+            rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.4, 1)
+            rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
+            data[x][y] = rgb_255
+        elif house.landmark:
+            this_religion = house.occupant.religion.value
+            rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.8, 1)
+            rg, gc, bc = 1, 1, 1
+            rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
+            data[x][y] = rgb_255
+        else:
+            data[x][y] = [0, 0, 0]
+    img_religion = Image.fromarray(data, 'RGB')
+    img_religion = img_religion.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+
+    return img_religion, img_ethnicity, img_income
 
 
 if __name__ == "__main__":
@@ -233,9 +255,10 @@ if __name__ == "__main__":
     frames_income = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
-        frame_income, frame_ethnicity = get_frame(city)
-        frames_income.append(frame_income)
+        frame_religion, frame_ethnicity, frame_income = get_frame(city)
+        frames_religion.append(frame_religion)
         frames_ethnicity.append(frame_ethnicity)
+        frames_income.append(frame_income)
 
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
@@ -254,4 +277,5 @@ if __name__ == "__main__":
     frames_ethnicity[0].save('out/ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=200,
                              loop=1)
     frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
+    frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=500, loop=1)
 
