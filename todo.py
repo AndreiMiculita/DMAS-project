@@ -11,14 +11,11 @@
 
 
 #Nachi
-#3. change range of neighbours influencing the happiness
-#     closer neighbours have higher weight (e.g. 1/distance)
-#     get that in a 1-dimensional list(one for neighbours and one for distance)
-#       When checking neighbour satisfaction, change agent.satisfied implementation(add weights), figure out handling empty slo
-
+#3. Test Range of results for different setups of religion, ethnicities ,(landmark?)
 #More graphs and results
 
 # Andrei
 #4. work on moving algorithm
+# Set happiness to one if your religious landmark is in neighbourhood.
 
 #checking neighbourhood
