@@ -10,7 +10,7 @@ from agent import Agent, RealNumberFeature, BinaryFeature, CategoricalFeature, r
 from home import Home
 from landmark import Landmark, CategoricalFeature, religion_preference_matrix
 from params import *
-
+from cluster_counts import cluster_religion, cluster_ethnicity, income_comparison
 
 def neighbors(a, radius, rowNumber, columnNumber, agent):
     """Return a list of all the neighbors
@@ -128,9 +128,9 @@ def time_step(i):
             city_satisfactions.append(int(satisfaction > 0.5))
             # If the agent is not satisfied with their current position, try to move
             if not satisfaction > 0.5:
-                if i == max_iterations - 1:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
-                          f" {satisfaction}")
+                #if i == max_iterations - 1:
+                    #print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
+                          #f" {satisfaction}")
                 # Move the agent to a random empty house that they are satisfied with
                 # first build a list of prospects
                 prospects = []
@@ -150,9 +150,9 @@ def time_step(i):
                     target_house.empty = False
                     house.occupant = None
                     house.empty = True
-            else:
-                if i == max_iterations - 1:
-                    print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
+            #else:
+               # if i == max_iterations - 1:
+                    #print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
 
     return np.average(city_satisfactions)
 
@@ -232,11 +232,13 @@ def get_frame(city):
     img_religion = Image.fromarray(data, 'RGB')
     img_religion = img_religion.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
-    return img_religion, img_ethnicity, img_income
-
+    return img_religion, img_ethnicity, img_income     
 
 if __name__ == "__main__":
     city = generate_city()
+    
+    print("initial number of clusters")
+    income_comparison(city)
     os.makedirs("out", exist_ok=True)
 
     # Bitmap for the gifs
@@ -276,11 +278,14 @@ if __name__ == "__main__":
 
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
-            print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
+            #print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
             break
 
         avg_satisfaction_over_time.append(avg_satisfaction)
-
+        
+        #print("final number of clusters")
+        income_comparison(city)
+        
     plt.clf()
     plt.plot(avg_satisfaction_over_time)
     plt.title("Average satisfaction over time")
@@ -293,4 +298,7 @@ if __name__ == "__main__":
                              loop=1)
     frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
     frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=500, loop=1)
-
+    
+#counting the clusters here results in wrong count, seems as if the simulation still runs after output is given
+#    print("last clusters")
+  #  cluster_count(city)
