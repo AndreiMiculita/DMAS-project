@@ -293,9 +293,6 @@ if __name__ == "__main__":
 
         avg_satisfaction_over_time.append(avg_satisfaction)
         
-        #print("intermediate number of clusters")
-        #cluster_religion(city)
-        
     plt.clf()
     plt.plot(avg_satisfaction_over_time)
     plt.title("Average satisfaction over time")
