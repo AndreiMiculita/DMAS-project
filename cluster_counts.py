@@ -82,6 +82,7 @@ def cluster_religion(city):
     print("number of agents:", total_count)
     mean_cluster_size = total_count/len(clusters)
     print("average cluster size:", mean_cluster_size)
+    return total_count, mean_cluster_size
     #for i in clusters:
      #   print(i)
     
@@ -149,6 +150,7 @@ def cluster_ethnicity(city):
     print("number of agents:", total_count)
     mean_cluster_size = total_count/len(clusters)
     print("average cluster size:", mean_cluster_size)
+    return total_count, mean_cluster_size
     #for i in clusters:
      #   print(i)
 

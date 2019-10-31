@@ -30,8 +30,9 @@ class CategoricalFeature:
         self.preference_matrix = preference_matrix
         self.threshold = threshold
 
-    def preference(self, i, j):
-        return self.preference_matrix[i][j] > self.threshold
+    def preference(self, other):
+        return self.preference_matrix[self.value][other.value] > self.threshold
+
 
 
 class Landmark:

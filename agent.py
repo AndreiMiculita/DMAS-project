@@ -95,9 +95,10 @@ class Agent:
 
         # If there is a landmark within the neighbors that shares a religion with the agent
         # then maximise religion satisfaction
-        for n in neighbors:
-            if n.landmark:
-                print("About to check for landmark religion")
+        
+        #for n in neighbors:
+            #if n.landmark:
+                #print("About to check for landmark religion")
                 #if self.religion.preference(n.religion):
                     #avg_neighbor_religion_satisfaction = 1
                     #print("I changed the satisfaction")

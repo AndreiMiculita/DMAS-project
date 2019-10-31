@@ -1,7 +1,8 @@
 import colorsys
 import os
 import random
-
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
@@ -115,7 +116,7 @@ def generate_city():
 
 
 def time_step(i):
-    if i % 100 == 0:
+    if i % 10 == 0:
         print(i)
 
     city_satisfactions = []
@@ -124,7 +125,7 @@ def time_step(i):
         # Skip edge for now
         if not (house.empty or house.landmark):
             agent = house.occupant
-            house_neighbors = neighbors(city, 1, x, y, agent)
+            house_neighbors = neighbors(city, radius, x, y, agent)
             satisfaction = agent.satisfied(house_neighbors)
             city_satisfactions.append(int(satisfaction > 0.5))
             # If the agent is not satisfied with their current position, try to move
@@ -142,7 +143,7 @@ def time_step(i):
                             prospects.append((xm, ym))
                         else:
                             # checking if prospect is satisfying
-                            p_house_neighbors = neighbors(city, 1, xm, ym, agent)
+                            p_house_neighbors = neighbors(city, radius, xm, ym, agent)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
                 if prospects:  # if list is not empty, move to a random element
@@ -242,7 +243,7 @@ if __name__ == "__main__":
     city = generate_city()
     
     print("initial number of clusters")
-    income_comparison(city)
+    cluster_religion(city)
     os.makedirs("out", exist_ok=True)
 
     # Bitmap for the gifs
@@ -273,13 +274,18 @@ if __name__ == "__main__":
     frames_religion = []
     frames_ethnicity = []
     frames_income = []
+    cluster_ethnicity =[]
+    cluster_religion = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
         frame_religion, frame_ethnicity, frame_income = get_frame(city)
         frames_religion.append(frame_religion)
         frames_ethnicity.append(frame_ethnicity)
         frames_income.append(frame_income)
-
+        e_c, e_s = cluster_ethnicity(city)
+        r_c, r_s =cluster_religion(city)
+        cluster_ethnicity.append(e_c)
+        cluster_religion.append(r_c)
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
             #print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
@@ -287,8 +293,8 @@ if __name__ == "__main__":
 
         avg_satisfaction_over_time.append(avg_satisfaction)
         
-        #print("final number of clusters")
-        income_comparison(city)
+        #print("intermediate number of clusters")
+        #cluster_religion(city)
         
     plt.clf()
     plt.plot(avg_satisfaction_over_time)
@@ -303,6 +309,20 @@ if __name__ == "__main__":
     frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
     frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=500, loop=1)
     
+    plt.clf()
+    plt.plot(cluster_ethnicity)
+    plt.title("Cluster count over time for ethnicity")
+    plt.xlabel("Number of steps")
+    plt.ylabel("Number of Clusters")
+    plt.savefig("out/cluster_count_ethnicity.png")
+    
+    plt.clf()
+    plt.plot(cluster_religion)
+    plt.title("Cluster count over time for religion")
+    plt.xlabel("Number of steps")
+    plt.ylabel("Number of Clusters")
+    plt.savefig("out/cluster_count_religion.png")
+    
 #counting the clusters here results in wrong count, seems as if the simulation still runs after output is given
-#    print("last clusters")
-  #  cluster_count(city)
+    print("last clusters")
+    cluster_religion(city)

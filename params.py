@@ -1,5 +1,5 @@
 # Max iterations
-max_iterations = 30
+max_iterations = 300
 # Simulation stop
 satisfaction_threshold = 0.9
 
@@ -33,5 +33,7 @@ landmark_ratio = 0.01
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
+radius = 2
+
 # Whether an agent checks their future neighbors before moving to a house
-check_future_home = False
+check_future_home = True
