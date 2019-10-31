@@ -116,7 +116,7 @@ def generate_city():
 
 
 def time_step(i):
-    if i % 10 == 0:
+    if i % 2 == 0:
         print(i)
 
     city_satisfactions = []
@@ -148,8 +148,7 @@ def time_step(i):
                             p_house_neighbors = neighbors(city, radius, xm, ym, agent)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
-                                if len(prospects)==5:
-                                    break
+                                break
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
                     target_house.occupant = house.occupant
@@ -247,7 +246,10 @@ if __name__ == "__main__":
     city = generate_city()
     
     print("initial number of clusters")
+    print("religion")
     cluster_religion(city)
+    print("ethnicity")
+    cluster_ethnicity(city)
     os.makedirs("out", exist_ok=True)
 
     # Bitmap for the gifs
@@ -299,31 +301,51 @@ if __name__ == "__main__":
         
     plt.clf()
     plt.plot(avg_satisfaction_over_time)
-    plt.title("Average satisfaction over time")
-    plt.xlabel("Number of steps")
-    plt.ylabel("Average satisfaction of all agents")
+    plt.title("Average Satisfaction Over Time")
+    plt.xlabel("Number of Steps")
+    plt.ylabel("Average Satisfaction of all Agents")
+    plt.xlim(xmin=0)
+    plt.ylim(ymin=0)
     plt.savefig("out/avg_satisfaction.png")
     print(f"average satisfaction: {avg_satisfaction}")
 
     frames_ethnicity[0].save('out/ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=200,
                              loop=1)
-    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=500, loop=1)
-    frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=500, loop=1)
+    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=200, loop=1)
+    frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=200, loop=1)
     
+    #ethnicity cluster
     plt.clf()
     plt.plot(cluster_eth)
-    plt.title("Cluster count over time for ethnicity")
-    plt.xlabel("Number of steps")
+    plt.title("Cluster Count Over Time for Ethnicity")
+    plt.xlabel("Number of Steps")
     plt.ylabel("Number of Clusters")
     plt.savefig("out/cluster_count_ethnicity.png")
     
+    #religion cluster
     plt.clf()
     plt.plot(cluster_rel)
-    plt.title("Cluster count over time for religion")
-    plt.xlabel("Number of steps")
+    plt.title("Cluster Count Over Time for Religion")
+    plt.xlabel("Number of Steps")
     plt.ylabel("Number of Clusters")
+    plt.xlim(xmin=0)
+    plt.ylim(ymin=0)
     plt.savefig("out/cluster_count_religion.png")
-    
+
+    #combined cluster
+    plt.clf()
+    plt.plot(cluster_rel, label='Religion')
+    plt.plot(cluster_eth, label='Ethnicity')
+    plt.title("Cluster Count Over Time")
+    plt.xlabel("Number of Steps")
+    plt.ylabel("Number of Clusters")
+    plt.legend(loc='upper right')
+    plt.xlim(xmin=0)
+    plt.ylim(ymin=0)
+    plt.savefig("out/cluster_rel_eth.png")
 #counting the clusters here results in wrong count, seems as if the simulation still runs after output is given
     print("last clusters")
+    print("religion")
     cluster_religion(city)
+    print("ethnicity")
+    cluster_ethnicity(city)
