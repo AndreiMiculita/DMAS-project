@@ -274,8 +274,8 @@ if __name__ == "__main__":
     frames_religion = []
     frames_ethnicity = []
     frames_income = []
-    cluster_ethnicity =[]
-    cluster_religion = []
+    cluster_eth =[]
+    cluster_rel = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
         frame_religion, frame_ethnicity, frame_income = get_frame(city)
@@ -284,8 +284,8 @@ if __name__ == "__main__":
         frames_income.append(frame_income)
         e_c, e_s = cluster_ethnicity(city)
         r_c, r_s =cluster_religion(city)
-        cluster_ethnicity.append(e_c)
-        cluster_religion.append(r_c)
+        cluster_eth.append(e_c)
+        cluster_rel.append(r_c)
         avg_satisfaction = time_step(i)
         if avg_satisfaction > satisfaction_threshold:
             #print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
@@ -310,14 +310,14 @@ if __name__ == "__main__":
     frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=500, loop=1)
     
     plt.clf()
-    plt.plot(cluster_ethnicity)
+    plt.plot(cluster_eth)
     plt.title("Cluster count over time for ethnicity")
     plt.xlabel("Number of steps")
     plt.ylabel("Number of Clusters")
     plt.savefig("out/cluster_count_ethnicity.png")
     
     plt.clf()
-    plt.plot(cluster_religion)
+    plt.plot(cluster_rel)
     plt.title("Cluster count over time for religion")
     plt.xlabel("Number of steps")
     plt.ylabel("Number of Clusters")
