@@ -177,7 +177,9 @@ def income_comparison(city):
             else:
                 income_happiness.append(income_gap/len(house_neighbors))
         continue
-    print("income gap average is:", sum(income_happiness)/len(income_happiness))
+        mean_inc_satisfaction = sum(income_happiness)/len(income_happiness)
+    #print("income gap average is:", mean_inc_satisfaction)
+    return (mean_inc_satisfaction)
     
     
     

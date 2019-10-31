@@ -84,10 +84,18 @@ class Agent:
         # First put all the satisfactions in arrays, for each feature and each neighbor
         # There's probably an even shorter way of doing this in python
         # Use income temporarily
-        neighbor_religion_satisfactions = [self.religion.preference(n.religion) for n in neighbors if not n.landmark]
-        neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors if not n.landmark]
-        neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
-
+        if self.weights[0]!=0:
+            neighbor_religion_satisfactions = [self.religion.preference(n.religion) for n in neighbors if not n.landmark]
+        else:
+            neighbor_religion_satisfactions = [0]
+        if self.weights[1]!=0:
+            neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors if not n.landmark]
+        else:
+            neighbor_ethnicity_satisfactions = [0]
+        if self.weights[2]!=0:
+            neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
+        else:
+            neighbor_income_satisfactions = [0]
         # Calculate the average satisfaction for each feature
         avg_neighbor_religion_satisfaction = np.average(neighbor_religion_satisfactions)
         avg_neighbor_ethnicity_satisfaction = np.average(neighbor_ethnicity_satisfactions)
@@ -97,11 +105,11 @@ class Agent:
         # then maximise religion satisfaction
 
         #use this if religion works.
-        #for n in neighbors:
-            #if n.landmark:
+        for n in neighbors:
+            if n.landmark:
                 #print("About to check for landmark religion")
-                #if self.religion.preference(n.religion):
-                    #avg_neighbor_religion_satisfaction = 1
+                if self.religion.preference(n.religion):
+                    avg_neighbor_religion_satisfaction = 1
                     #print("I changed the satisfaction")
 
         # 3 arrays can be treated as a matrix, np.average averages all of the numbers
