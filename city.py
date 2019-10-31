@@ -136,16 +136,19 @@ def time_step(i):
                 # Move the agent to a random empty house that they are satisfied with
                 # first build a list of prospects
                 prospects = []
+                #move as soon as prospect is filled
                 for (xm, ym), housem in np.ndenumerate(city):
                     if housem.empty:
                         # In some cases we want them to not check the future home, and move randomly
                         if not check_future_home:
                             prospects.append((xm, ym))
+                            #break
                         else:
                             # checking if prospect is satisfying
                             p_house_neighbors = neighbors(city, radius, xm, ym, agent)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
+                                break
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
                     target_house.occupant = house.occupant
