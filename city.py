@@ -148,7 +148,8 @@ def time_step(i):
                             p_house_neighbors = neighbors(city, radius, xm, ym, agent)
                             if agent.satisfied(p_house_neighbors) > 0.5:
                                 prospects.append((xm, ym))
-                                break
+                                if len(prospects)==5:
+                                    break
                 if prospects:  # if list is not empty, move to a random element
                     target_house = city[random.choice(prospects)]
                     target_house.occupant = house.occupant
