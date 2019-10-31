@@ -12,6 +12,7 @@ from landmark import Landmark, CategoricalFeature, religion_preference_matrix
 from params import *
 from cluster_counts import cluster_religion, cluster_ethnicity, income_comparison
 
+
 def neighbors(a, radius, rowNumber, columnNumber, agent):
     """Return a list of all the neighbors
     :param a: city matrix
@@ -211,28 +212,31 @@ def get_frame(city):
     # Upscale image so it's easier to see
     # img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
+
     # Plot religions
-    total_religions = 10
+    total_religions = 5
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
-        if not (house.empty or house.landmark):
+        if not house.empty:
             this_religion = house.occupant.religion.value
             rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.4, 1)
             rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
-            data[x][y] = rgb_255
-        elif house.landmark:
-            this_religion = house.occupant.religion.value
-            rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.8, 1)
-            rg, gc, bc = 1, 1, 1
-            rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
-            data[x][y] = rgb_255
+            if not house.landmark:
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100)
+            else:
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100, marker="^")
         else:
-            data[x][y] = [0, 0, 0]
-    img_religion = Image.fromarray(data, 'RGB')
-    img_religion = img_religion.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
+            plt.scatter(x, y, c="black", s=100)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.axis("off")
 
-    return img_religion, img_ethnicity, img_income     
+    canvas = plt.get_current_fig_manager().canvas
+    canvas.draw()
+    img_religion = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
+
+    return img_religion, img_ethnicity, img_income
+
 
 if __name__ == "__main__":
     city = generate_city()

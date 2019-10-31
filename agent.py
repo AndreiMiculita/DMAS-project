@@ -40,8 +40,8 @@ class CategoricalFeature:
         self.preference_matrix = preference_matrix
         self.threshold = threshold
 
-    def preference(self, i, j):
-        return self.preference_matrix[i][j] > self.threshold
+    def preference(self, other):
+        return self.preference_matrix[self.value][other.value] > self.threshold
 
 
 # When a feature is a real number
@@ -84,7 +84,7 @@ class Agent:
         # First put all the satisfactions in arrays, for each feature and each neighbor
         # There's probably an even shorter way of doing this in python
         # Use income temporarily
-        neighbor_religion_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
+        neighbor_religion_satisfactions = [self.religion.preference(n.religion) for n in neighbors if not n.landmark]
         neighbor_ethnicity_satisfactions = [self.ethnicity.preference(n.ethnicity) for n in neighbors if not n.landmark]
         neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
 
