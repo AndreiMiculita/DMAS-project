@@ -172,12 +172,12 @@ def get_frame(city):
         if not (house.empty or house.landmark):
             # equation of a line through 2 points (min_income, 0) and (max_income,255)
             color = int((house.occupant.income.value - min_income) * 255 / (max_income - min_income))
-            plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=100)
+            plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=10)
             data[x][y] = [color, 255, color]
         elif house.landmark:
-            plt.scatter(x,y,c="green",s=100,marker="^")
+            plt.scatter(x,y,c="green",s=10,marker="^")
         else:
-            plt.scatter(x,y,c="black",s=100)
+            plt.scatter(x,y,c="black",s=10)
 
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis("off")
@@ -195,13 +195,13 @@ def get_frame(city):
             continue
         if not (house.empty or house.landmark):
             if house.occupant.ethnicity.value:
-                plt.scatter(x, y, c="red",s=100)
+                plt.scatter(x, y, c="red",s=10)
             else:
-                plt.scatter(x,y,c="blue",s=100)
+                plt.scatter(x,y,c="blue",s=10)
         elif house.landmark:
-            plt.scatter(x,y,c="green",s=100,marker="^")
+            plt.scatter(x,y,c="green",s=10,marker="^")
         else:
-            plt.scatter(x,y,c="black",s=100)
+            plt.scatter(x,y,c="black",s=10)
 
     # for (xm, ym), colorm in np.ndenumerate(data):
     #     plt.scatter(x, y, c=colorm)
@@ -227,11 +227,11 @@ def get_frame(city):
             rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.4, 1)
             rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
             if not house.landmark:
-                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100)
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=10)
             else:
-                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100, marker="^")
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=10, marker="^")
         else:
-            plt.scatter(x, y, c="black", s=100)
+            plt.scatter(x, y, c="black", s=10)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis("off")
 
@@ -282,12 +282,14 @@ if __name__ == "__main__":
     frames_income = []
     cluster_eth =[]
     cluster_rel = []
+    inc_satisfaction = []
     # Go up to max_iterations
     for i in range(0, max_iterations):
         frame_religion, frame_ethnicity, frame_income = get_frame(city)
         frames_religion.append(frame_religion)
         frames_ethnicity.append(frame_ethnicity)
         frames_income.append(frame_income)
+        inc_satisfaction.append(income_comparison(city))
         e_c, e_s = cluster_ethnicity(city)
         r_c, r_s =cluster_religion(city)
         cluster_eth.append(e_c)
@@ -331,6 +333,17 @@ if __name__ == "__main__":
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
     plt.savefig("out/cluster_count_religion.png")
+
+    #income satisfaction plot
+    plt.clf()
+    plt.plot(inc_satisfaction)
+    plt.title("Neighbor Income Satisfaction over Time")
+    plt.xlabel("Number of Steps")
+    plt.ylabel("Average Satisfaction regarding Neighbor Incomes")
+    plt.xlim(xmin=0)
+    plt.ylim(ymin=0)
+    plt.savefig("out/income_satisfaction.png")
+
 
     #combined cluster
     plt.clf()

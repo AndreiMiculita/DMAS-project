@@ -15,8 +15,8 @@ def agent_count(city):
             landmarks += 1
         else:
             empty +=1
-    print("agents, landmarks, empty")
-    print(agents, landmarks, empty)
+    #print("agents, landmarks, empty")
+    #print(agents, landmarks, empty)
     
 #counts hoshen_kopelman clusters for religion
 def cluster_religion(city):
@@ -75,7 +75,7 @@ def cluster_religion(city):
                     agent_counted.append([x,y])
             continue
         
-    print("number of religion clusters:", len(clusters))
+    #print("number of religion clusters:", len(clusters))
     total_count = 0
     for i in clusters:
         total_count += len(i[1])
@@ -143,7 +143,7 @@ def cluster_ethnicity(city):
                     agent_counted.append([x,y])
             continue
         
-    print("number of ethnicity clusters:", len(clusters))
+    #print("number of ethnicity clusters:", len(clusters))
     total_count = 0
     for i in clusters:
         total_count += len(i[1])
@@ -177,9 +177,7 @@ def income_comparison(city):
             else:
                 income_happiness.append(income_gap/len(house_neighbors))
         continue
-        mean_inc_satisfaction = sum(income_happiness)/len(income_happiness)
-    #print("income gap average is:", mean_inc_satisfaction)
-    return (mean_inc_satisfaction)
+    return (sum(income_happiness)/len(income_happiness))
     
     
     
