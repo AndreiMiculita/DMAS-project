@@ -79,6 +79,10 @@ class Agent:
         self.weights = weights
         self.landmark = landmark
 
+    def income_satisfaction_calculation(self, other_income):
+        sat = (self.income - other_income)/max(self.income, other_income)
+        return sat
+
     # Whether an agent is satisfied with their current position
     def satisfied(self, neighbors):
         # First put all the satisfactions in arrays, for each feature and each neighbor
@@ -93,7 +97,7 @@ class Agent:
         else:
             neighbor_ethnicity_satisfactions = [0]
         if self.weights[2]!=0:
-            neighbor_income_satisfactions = [self.income.preference(n.income) for n in neighbors if not n.landmark]
+            neighbor_income_satisfactions = [self.income_satisfaction_calculation(n.income) for n in neighbors if not n.landmark]
         else:
             neighbor_income_satisfactions = [0]
         # Calculate the average satisfaction for each feature
