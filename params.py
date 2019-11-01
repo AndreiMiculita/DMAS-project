@@ -4,7 +4,7 @@ max_iterations = 100
 satisfaction_threshold = 0.9
 
 # Width and height of the city grid
-w, h = 32,  32
+w, h = 16,  16
 
 # Min and max prices of homes
 min_price = 10000
@@ -33,7 +33,7 @@ landmark_ratio = 0.01
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
-radius = 2
+radius = 1
 
 # Whether an agent checks their future neighbors before moving to a house
 check_future_home = False

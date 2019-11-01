@@ -172,12 +172,12 @@ def get_frame(city):
         if not (house.empty or house.landmark):
             # equation of a line through 2 points (min_income, 0) and (max_income,255)
             color = int((house.occupant.income.value - min_income) * 255 / (max_income - min_income))
-            plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=10)
+            plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=100)
             data[x][y] = [color, 255, color]
         elif house.landmark:
-            plt.scatter(x,y,c="green",s=10,marker="^")
+            plt.scatter(x,y,c="green",s=100,marker="^")
         else:
-            plt.scatter(x,y,c="black",s=10)
+            plt.scatter(x,y,c="black",s=100)
 
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis("off")
@@ -195,13 +195,13 @@ def get_frame(city):
             continue
         if not (house.empty or house.landmark):
             if house.occupant.ethnicity.value:
-                plt.scatter(x, y, c="red",s=10)
+                plt.scatter(x, y, c="red",s=100)
             else:
-                plt.scatter(x,y,c="blue",s=10)
+                plt.scatter(x,y,c="blue",s=100)
         elif house.landmark:
-            plt.scatter(x,y,c="green",s=10,marker="^")
+            plt.scatter(x,y,c="green",s=100,marker="^")
         else:
-            plt.scatter(x,y,c="black",s=10)
+            plt.scatter(x,y,c="black",s=100)
 
     # for (xm, ym), colorm in np.ndenumerate(data):
     #     plt.scatter(x, y, c=colorm)
@@ -227,11 +227,11 @@ def get_frame(city):
             rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.4, 1)
             rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
             if not house.landmark:
-                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=10)
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100)
             else:
-                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=10, marker="^")
+                plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100, marker="^")
         else:
-            plt.scatter(x, y, c="black", s=10)
+            plt.scatter(x, y, c="black", s=100)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis("off")
 
