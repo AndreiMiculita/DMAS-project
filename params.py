@@ -22,7 +22,7 @@ price_noise = 0.3
 price_segregation = 0.1
 
 # Importance of religion, ethnicity and income respectively for each agent
-weight_list = [0.34, 0.33, 0.33]
+weight_list = [1, 0, 1]
 
 # Ratio of empty houses
 empty_ratio = 0.1
@@ -33,7 +33,7 @@ landmark_ratio = 0.01
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
-radius = 1
+radius = 2
 
 # Whether an agent checks their future neighbors before moving to a house
 check_future_home = False

@@ -362,3 +362,12 @@ if __name__ == "__main__":
     cluster_religion(city)
     print("ethnicity")
     cluster_ethnicity(city)
+
+    print('INCOME Satisfaction')
+    print(inc_satisfaction[0],inc_satisfaction[-1])
+
+    print('Cluster Counts')
+    print('Ethnicity')
+    print(cluster_eth[0], cluster_eth[-1])
+    print('Religion')
+    print(cluster_rel[0], cluster_rel[-1])
