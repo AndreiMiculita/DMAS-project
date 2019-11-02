@@ -80,7 +80,7 @@ class Agent:
         self.landmark = landmark
 
     def income_satisfaction_calculation(self, other_income):
-        sat = (self.income.value - other_income.value)/max(self.income.value, other_income.value)
+        sat = min(self.income.value, other_income.value)/max(self.income.value, other_income.value)
         return sat
 
     # Whether an agent is satisfied with their current position
