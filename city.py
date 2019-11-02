@@ -155,9 +155,9 @@ def time_step(i):
                     target_house.empty = False
                     house.occupant = None
                     house.empty = True
-            #else:
-               # if i == max_iterations - 1:
-                    #print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
+                # else:
+                    # if i == max_iterations - 1:
+                     # print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
 
     return np.average(city_satisfactions)
 
@@ -216,7 +216,6 @@ def get_frame(city):
     # Upscale image so it's easier to see
     # img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
 
-
     # Plot religions
     total_religions = 5
     for (x, y), house in np.ndenumerate(city):
@@ -250,7 +249,8 @@ if __name__ == "__main__":
     cluster_religion(city)
     print("ethnicity")
     cluster_ethnicity(city)
-    os.makedirs("out", exist_ok=True)
+    outpath = "out_" + str(w) + "x" + str(h)+ "weights" + str(weight_list[0]) + str(weight_list[1]) + str(weight_list[2])
+    os.makedirs(outpath, exist_ok=True)
 
     # Bitmap for the gifs
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
     # Upscale image so it's easier to see
     img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-    img.save("out/house_prices.png")
+    img.save(outpath + "/house_prices.png")
 
     # sys.stdout = open("out.csv", "w")
 
@@ -291,7 +291,7 @@ if __name__ == "__main__":
         frames_income.append(frame_income)
         inc_satisfaction.append(income_comparison(city))
         e_c, e_s = cluster_ethnicity(city)
-        r_c, r_s =cluster_religion(city)
+        r_c, r_s = cluster_religion(city)
         cluster_eth.append(e_c)
         cluster_rel.append(r_c)
         avg_satisfaction = time_step(i)
@@ -308,13 +308,13 @@ if __name__ == "__main__":
     plt.ylabel("Average Satisfaction of all Agents")
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
-    plt.savefig("out/avg_satisfaction.png")
+    plt.savefig(outpath + "/avg_satisfaction.png")
     print(f"average satisfaction: {avg_satisfaction}")
 
-    frames_ethnicity[0].save('out/ethnicities.gif', append_images=frames_ethnicity[1:], save_all=True, duration=200,
+    frames_ethnicity[0].save(outpath + "/ethnicities.gif", append_images=frames_ethnicity[1:], save_all=True, duration=200,
                              loop=1)
-    frames_income[0].save('out/income.gif', append_images=frames_income[1:], save_all=True, duration=200, loop=1)
-    frames_religion[0].save('out/religion.gif', append_images=frames_religion[1:], save_all=True, duration=200, loop=1)
+    frames_income[0].save(outpath + "/income.gif", append_images=frames_income[1:], save_all=True, duration=200, loop=1)
+    frames_religion[0].save(outpath + "/religion.gif", append_images=frames_religion[1:], save_all=True, duration=200, loop=1)
     
     #ethnicity cluster
     plt.clf()
@@ -322,7 +322,7 @@ if __name__ == "__main__":
     plt.title("Cluster Count Over Time for Ethnicity")
     plt.xlabel("Number of Steps")
     plt.ylabel("Number of Clusters")
-    plt.savefig("out/cluster_count_ethnicity.png")
+    plt.savefig(outpath + "/cluster_count_ethnicity.png")
     
     #religion cluster
     plt.clf()
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     plt.ylabel("Number of Clusters")
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
-    plt.savefig("out/cluster_count_religion.png")
+    plt.savefig(outpath + "/cluster_count_religion.png")
 
     #income satisfaction plot
     plt.clf()
@@ -342,7 +342,7 @@ if __name__ == "__main__":
     plt.ylabel("Average Satisfaction regarding Neighbor Incomes")
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
-    plt.savefig("out/income_satisfaction.png")
+    plt.savefig(outpath + "/income_satisfaction.png")
 
 
     #combined cluster
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     plt.legend(loc='upper right')
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
-    plt.savefig("out/cluster_rel_eth.png")
+    plt.savefig(outpath + "/cluster_rel_eth.png")
 #counting the clusters here results in wrong count, seems as if the simulation still runs after output is given
     print("last clusters")
     print("religion")
