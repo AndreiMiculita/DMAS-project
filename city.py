@@ -249,7 +249,7 @@ if __name__ == "__main__":
     cluster_religion(city)
     print("ethnicity")
     cluster_ethnicity(city)
-    outpath = "out_" + str(w) + "x" + str(h)+ "weights" + str(weight_list[0]) + str(weight_list[1]) + str(weight_list[2])
+    outpath = "out_" + str(w) + "x" + str(h) + "_r" + str(radius) + "_weights" + str(weight_list[0]) + str(weight_list[1]) + str(weight_list[2])
     os.makedirs(outpath, exist_ok=True)
 
     # Bitmap for the gifs
