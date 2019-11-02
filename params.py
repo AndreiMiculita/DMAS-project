@@ -33,7 +33,7 @@ landmark_ratio = 0.01
 # how much to zoom in on the picture before displaying, please use integer for good results
 zoom = 10
 
-radius = 1
+radius = 2
 
 # Whether an agent checks their future neighbors before moving to a house
 check_future_home = False
