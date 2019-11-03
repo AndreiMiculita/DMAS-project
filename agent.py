@@ -41,6 +41,7 @@ class CategoricalFeature:
         self.threshold = threshold
 
     def preference(self, other):
+        # Compare the agent's own religion value to a neighbor and check whether it passes the threshold
         return self.preference_matrix[self.value][other.value] > self.threshold
 
 
@@ -85,9 +86,7 @@ class Agent:
 
     # Whether an agent is satisfied with their current position
     def satisfied(self, neighbors):
-        # First put all the satisfactions in arrays, for each feature and each neighbor
-        # There's probably an even shorter way of doing this in python
-        # Use income temporarily
+        # First put all the satisfactions in arrays, for each feature and each non-landmark neighbor
         if self.weights[0]!=0:
             neighbor_religion_satisfactions = [self.religion.preference(n.religion) for n in neighbors if not n.landmark]
         else:
@@ -108,13 +107,12 @@ class Agent:
         # If there is a landmark within the neighbors that shares a religion with the agent
         # then maximise religion satisfaction
 
-        #use this if religion works.
+        # Check if one of the neighbors is a landmark
+        # If the religion of the agent matches the landmark's religion, change religious satisfaction
         for n in neighbors:
             if n.landmark:
-                #print("About to check for landmark religion")
                 if self.religion.preference(n.religion):
                     avg_neighbor_religion_satisfaction = 1
-                    #print("I changed the satisfaction")
 
         # 3 arrays can be treated as a matrix, np.average averages all of the numbers
         self.satisfaction = np.average(a=[avg_neighbor_religion_satisfaction,

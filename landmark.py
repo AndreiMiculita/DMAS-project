@@ -31,8 +31,8 @@ class CategoricalFeature:
         self.threshold = threshold
 
     def preference(self, other):
+        # Compare the agent's own religion value to a neighbor and check whether it passes the threshold
         return self.preference_matrix[self.value][other.value] > self.threshold
-
 
 
 class Landmark:

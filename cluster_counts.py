@@ -1,7 +1,7 @@
 import numpy as np
 from params import *
 
-#counts number of agents, landmarks and empty houses
+# Counts number of agents, landmarks and empty houses
 def agent_count(city):
     agents = 0
     empty = 0
@@ -14,11 +14,9 @@ def agent_count(city):
         elif not house.empty:
             landmarks += 1
         else:
-            empty +=1
-    #print("agents, landmarks, empty")
-    #print(agents, landmarks, empty)
+            empty += 1
     
-#counts hoshen_kopelman clusters for religion
+# Counts hoshen_kopelman clusters for religion
 def cluster_religion(city):
     agent_counted = []
     clusters = []
@@ -74,19 +72,15 @@ def cluster_religion(city):
                     clusters.append([agent.religion.value,[[x,y]]])
                     agent_counted.append([x,y])
             continue
-        
-    #print("number of religion clusters:", len(clusters))
+
     total_count = 0
     for i in clusters:
         total_count += len(i[1])
-    #print("number of agents:", total_count)
     mean_cluster_size = total_count/len(clusters)
-    #print("average cluster size:", mean_cluster_size)
     return len(clusters), mean_cluster_size
-    #for i in clusters:
-     #   print(i)
+
     
-#counts hoshen_kopelman clusters for ethnicity
+# Counts hoshen_kopelman clusters for ethnicity
 def cluster_ethnicity(city):
     agent_counted = []
     clusters = []
@@ -142,19 +136,15 @@ def cluster_ethnicity(city):
                     clusters.append([agent.ethnicity.value,[[x,y]]])
                     agent_counted.append([x,y])
             continue
-        
-    #print("number of ethnicity clusters:", len(clusters))
+
     total_count = 0
     for i in clusters:
         total_count += len(i[1])
-    #print("number of agents:", total_count)
     mean_cluster_size = total_count/len(clusters)
-    #print("average cluster size:", mean_cluster_size)
     return len(clusters), mean_cluster_size
-    #for i in clusters:
-     #   print(i)
 
-#income comparison   
+
+# Income comparison
 def income_comparison(city):
     income_happiness = []
     for (x,y), house in np.ndenumerate(city):
@@ -177,18 +167,4 @@ def income_comparison(city):
             else:
                 income_happiness.append(income_gap/len(house_neighbors))
         continue
-    return (sum(income_happiness)/len(income_happiness))
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    return sum(income_happiness)/len(income_happiness)

@@ -22,37 +22,27 @@ def neighbors(a, radius, rowNumber, columnNumber, agent):
     :param columnNumber: current column number of house
     :param agent: agent living in house"""
     house_neighbors = []
-    # empty = 0
-    # print(rowNumber, columnNumber, end="")
+
+    # Add any neighbors in range thar are not the agent itself.
     for i in range(rowNumber - radius, rowNumber + radius + 1):
         for j in range(columnNumber - radius, columnNumber + radius + 1):
             if 0 <= i < len(a) and 0 <= j < len(a[0]):
                 if not a[i][j].empty and a[i][j].occupant != agent:
                     house_neighbors.append(a[i][j].occupant)
-                #     print("neighbor", i, j, end="")
-                # else:
-                # empty+=1
-                # print("empty", i, j, end="")
-    # print("neighbors: ", len(house_neighbors), "empty: ", empty)
     return house_neighbors
 
 
 def neighbors_weighted(a, radius, rowNumber, columnNumber, agent):
     """Closer neighbors are more important (counted multiple times)"""
     house_neighbors = []
-    # empty = 0
-    # print(rowNumber, columnNumber, end="")
+
+    # Add any neighbors in range that are not the agent itself.
     for r in range(1, radius + 1):
         for i in range(rowNumber - r, rowNumber + r + 1):
             for j in range(columnNumber - r, columnNumber + r + 1):
                 if 0 <= i < len(a) and 0 <= j < len(a[0]):
                     if not a[i][j].empty and a[i][j].occupant != agent:
                         house_neighbors.append(a[i][j].occupant)
-                    #     print("neighbor", i, j, end="")
-                    # else:
-                    # empty+=1
-                    # print("empty", i, j, end="")
-    # print("neighbors: ", len(house_neighbors), "empty: ", empty)
     return house_neighbors
 
 
@@ -116,6 +106,7 @@ def generate_city():
 
 
 def time_step(i):
+    # A print showing the progress of the iterations, helpful to see progress is being made while simulating.
     if i % 2 == 0:
         print(i)
 
@@ -130,19 +121,15 @@ def time_step(i):
             city_satisfactions.append(int(satisfaction > 0.5))
             # If the agent is not satisfied with their current position, try to move
             if not satisfaction > 0.5:
-                #if i == max_iterations - 1:
-                    #print(f"{str(x)}, {str(y)}, {str(agent)}, not satisfied,"
-                          #f" {satisfaction}")
                 # Move the agent to a random empty house that they are satisfied with
                 # first build a list of prospects
                 prospects = []
-                #move as soon as prospect is filled
+                # Move as soon as prospect is filled
                 for (xm, ym), housem in np.ndenumerate(city):
                     if housem.empty:
                         # In some cases we want them to not check the future home, and move randomly
                         if not check_future_home:
                             prospects.append((xm, ym))
-                            #break
                         else:
                             # checking if prospect is satisfying
                             p_house_neighbors = neighbors(city, radius, xm, ym, agent)
@@ -155,9 +142,6 @@ def time_step(i):
                     target_house.empty = False
                     house.occupant = None
                     house.empty = True
-                # else:
-                    # if i == max_iterations - 1:
-                     # print(f"{str(x)}, {str(y)}, {str(agent)}, satisfied, {satisfaction}")
 
     return np.average(city_satisfactions)
 
@@ -175,8 +159,10 @@ def get_frame(city):
             plt.scatter(x, y, c='#%02x%02x%02x' % (255, color, 255),s=100)
             data[x][y] = [color, 255, color]
         elif house.landmark:
+            # Make landmarks green on the income map
             plt.scatter(x,y,c="green",s=100,marker="^")
         else:
+            # Show Empty spaces as black on the income map
             plt.scatter(x,y,c="black",s=100)
 
     plt.gca().set_aspect('equal', adjustable='box')
@@ -186,25 +172,23 @@ def get_frame(city):
     canvas.draw()
     img_income = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
 
-    # Upscale image so it's easier to see
-    # img_income = img_income.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-
     # Plot ethnicities
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
         if not (house.empty or house.landmark):
+            # Since ethnicity is binary for now, add fixed colors red and blue based on ethnicity value
             if house.occupant.ethnicity.value:
                 plt.scatter(x, y, c="red",s=100)
             else:
                 plt.scatter(x,y,c="blue",s=100)
         elif house.landmark:
+            # Make landmarks green on the ethnicity map
             plt.scatter(x,y,c="green",s=100,marker="^")
         else:
+            # Show empty spaces as black on the ethnicity map
             plt.scatter(x,y,c="black",s=100)
 
-    # for (xm, ym), colorm in np.ndenumerate(data):
-    #     plt.scatter(x, y, c=colorm)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis("off")
 
@@ -212,22 +196,21 @@ def get_frame(city):
     canvas.draw()
     img_ethnicity = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
 
-    # img_ethnicity = Image.fromarray(data, 'RGB')
-    # Upscale image so it's easier to see
-    # img_ethnicity = img_ethnicity.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
-
     # Plot religions
     total_religions = 5
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
         if not house.empty:
+            # Add a unique color for every religion
             this_religion = house.occupant.religion.value
             rc, gc, bc = colorsys.hls_to_rgb(this_religion / total_religions, 0.4, 1)
             rgb_255 = (int(rc * 255), int(gc * 255), int(bc * 255))
             if not house.landmark:
+                # Give the agents the color of their religion on the religion map
                 plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100)
             else:
+                # Give landmarks the color of their religion on the religion map, and make them a triangle
                 plt.scatter(x, y, c='#%02x%02x%02x' % rgb_255, s=100, marker="^")
         else:
             plt.scatter(x, y, c="black", s=100)
@@ -243,11 +226,8 @@ def get_frame(city):
 
 if __name__ == "__main__":
     city = generate_city()
-    
-    print("initial number of clusters")
-    print("religion")
+
     cluster_religion(city)
-    print("ethnicity")
     cluster_ethnicity(city)
     outpath = "out_" + str(w) + "x" + str(h) + "_r" + str(radius) + "_weights" + str(weight_list[0]) + str(weight_list[1]) + str(weight_list[2])
     os.makedirs(outpath, exist_ok=True)
@@ -256,6 +236,8 @@ if __name__ == "__main__":
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
 
     # Plot house prices
+    # House prices are currently not used in our final version, however they are generated and
+    # could be used for future projects.
     for (x, y), house in np.ndenumerate(city):
         if x > w or y > h:
             continue
@@ -273,8 +255,6 @@ if __name__ == "__main__":
     img = img.resize((int(w * zoom), int(h * zoom)), Image.NEAREST)
     img.save(outpath + "/house_prices.png")
 
-    # sys.stdout = open("out.csv", "w")
-
     avg_satisfaction_over_time = []
 
     frames_religion = []
@@ -283,7 +263,7 @@ if __name__ == "__main__":
     cluster_eth =[]
     cluster_rel = []
     inc_satisfaction = []
-    # Go up to max_iterations
+    # Go up to max_iterations, reaching max iterations is a terminating condition
     for i in range(0, max_iterations):
         frame_religion, frame_ethnicity, frame_income = get_frame(city)
         frames_religion.append(frame_religion)
@@ -295,12 +275,13 @@ if __name__ == "__main__":
         cluster_eth.append(e_c)
         cluster_rel.append(r_c)
         avg_satisfaction = time_step(i)
+        # If the average satisfaction reaches the threshold, trigger the second possible terminating condition
         if avg_satisfaction > satisfaction_threshold:
-            #print(f"Average agent satisfaction {avg_satisfaction} is above {satisfaction_threshold} after {i} steps.")
             break
 
         avg_satisfaction_over_time.append(avg_satisfaction)
-        
+
+    # Satisfaction over time plot
     plt.clf()
     plt.plot(avg_satisfaction_over_time)
     plt.title("Average Satisfaction Over Time")
@@ -316,7 +297,7 @@ if __name__ == "__main__":
     frames_income[0].save(outpath + "/income.gif", append_images=frames_income[1:], save_all=True, duration=200, loop=1)
     frames_religion[0].save(outpath + "/religion.gif", append_images=frames_religion[1:], save_all=True, duration=200, loop=1)
     
-    #ethnicity cluster
+    # Ethnicity cluster plot
     plt.clf()
     plt.plot(cluster_eth)
     plt.title("Cluster Count Over Time for Ethnicity")
@@ -324,7 +305,7 @@ if __name__ == "__main__":
     plt.ylabel("Number of Clusters")
     plt.savefig(outpath + "/cluster_count_ethnicity.png")
     
-    #religion cluster
+    # Religion cluster plot
     plt.clf()
     plt.plot(cluster_rel)
     plt.title("Cluster Count Over Time for Religion")
@@ -334,7 +315,7 @@ if __name__ == "__main__":
     plt.ylim(ymin=0)
     plt.savefig(outpath + "/cluster_count_religion.png")
 
-    #income satisfaction plot
+    # Income satisfaction plot
     plt.clf()
     plt.plot(inc_satisfaction)
     plt.title("Neighbor Income Satisfaction over Time")
@@ -344,8 +325,7 @@ if __name__ == "__main__":
     plt.ylim(ymin=0)
     plt.savefig(outpath + "/income_satisfaction.png")
 
-
-    #combined cluster
+    # Combined cluster
     plt.clf()
     plt.plot(cluster_rel, label='Religion')
     plt.plot(cluster_eth, label='Ethnicity')
@@ -356,7 +336,8 @@ if __name__ == "__main__":
     plt.xlim(xmin=0)
     plt.ylim(ymin=0)
     plt.savefig(outpath + "/cluster_rel_eth.png")
-#counting the clusters here results in wrong count, seems as if the simulation still runs after output is given
+
+    # Print final clusters
     print("last clusters")
     print("religion")
     cluster_religion(city)
