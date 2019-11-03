@@ -31,8 +31,8 @@ class Ethnicity(Enum):
     AAD = auto()  # Antillean, Aruban, or Dutch Caribbean
 
 
-# When a feature is an unordered category (e.g. religion, ethnicity)
 class CategoricalFeature:
+    """When a feature is an unordered category (e.g. religion, ethnicity)"""
     categories: Enum
 
     def __init__(self, value, preference_matrix, threshold=0.5):
@@ -45,8 +45,8 @@ class CategoricalFeature:
         return self.preference_matrix[self.value][other.value] > self.threshold
 
 
-# When a feature is a real number
 class RealNumberFeature(object):
+    """When a feature is a real number (continuous)"""
     def __init__(self, value: float, threshold=20000, difference_function=lambda x: x):
         self.value = value
         self.difference_function = difference_function  # the function passed as a parameter
@@ -56,8 +56,8 @@ class RealNumberFeature(object):
         return self.difference_function(abs(other.value - self.value)) < self.threshold
 
 
-# When a feature is binary
 class BinaryFeature(object):
+    """When a feature is binary"""
     def __init__(self, value: bool):
         self.value = value
 
@@ -65,8 +65,8 @@ class BinaryFeature(object):
         return self.value == other.value
 
 
-# An agent with the ability to make decisions
 class Agent:
+    """An agent with the ability to make decisions"""
     satisfaction_threshold = 0.5
 
     def __init__(self, religion: CategoricalFeature, ethnicity: BinaryFeature, income: RealNumberFeature, landmark,

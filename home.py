@@ -2,6 +2,7 @@ from agent import Agent
 
 
 class Home:
+    """A home that can hold an agent or a landmark"""
     def __init__(self, price, empty: bool, landmark: bool, occupant: Agent):
         self.price = price
         self.empty = empty

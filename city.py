@@ -15,12 +15,13 @@ from cluster_counts import cluster_religion, cluster_ethnicity, income_compariso
 
 
 def neighbors(a, radius, rowNumber, columnNumber, agent):
-    """Return a list of all the neighbors
+    """Get a list of all the neighbors
     :param a: city matrix
     :param radius: maximum chebyshev distance to check
     :param rowNumber: current row number of house
     :param columnNumber: current column number of house
-    :param agent: agent living in house"""
+    :param agent: agent living in house
+    :return a list containing the neighbor agent objects"""
     house_neighbors = []
 
     # Add any neighbors in range thar are not the agent itself.
@@ -33,7 +34,13 @@ def neighbors(a, radius, rowNumber, columnNumber, agent):
 
 
 def neighbors_weighted(a, radius, rowNumber, columnNumber, agent):
-    """Closer neighbors are more important (counted multiple times)"""
+    """Closer neighbors are more important (counted multiple times)
+    :param a: city matrix
+    :param radius: maximum chebyshev distance to check
+    :param rowNumber: current row number of house
+    :param columnNumber: current column number of house
+    :param agent: agent living in house
+    :return a list containing the neighbor agent objects"""
     house_neighbors = []
 
     # Add any neighbors in range that are not the agent itself.
@@ -47,6 +54,7 @@ def neighbors_weighted(a, radius, rowNumber, columnNumber, agent):
 
 
 def generate_city():
+    """Generate a random city grid based on the parameters"""
     # City is a matrix with a padding
     grid = np.zeros((w + 2, h + 2), dtype=object)
     for x in range(-2, w + 2):
@@ -106,6 +114,9 @@ def generate_city():
 
 
 def time_step(i):
+    """Makes one time step (epoch) pass
+    :param i: the number of the time step
+    :return ratio of agents that are satisfied at the end of the time step"""
     # A print showing the progress of the iterations, helpful to see progress is being made while simulating.
     if i % 2 == 0:
         print(i)
@@ -147,6 +158,9 @@ def time_step(i):
 
 
 def get_frame(city):
+    """Draw the city
+    :param city: the city grid
+    :return tuple of religion, ethnicity and income images"""
     data = np.zeros((h + 1, w + 1, 3), dtype=np.uint8)
 
     # Plot incomes

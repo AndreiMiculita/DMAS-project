@@ -1,8 +1,9 @@
 import numpy as np
 from params import *
 
-# Counts number of agents, landmarks and empty houses
+
 def agent_count(city):
+    """Counts number of agents, landmarks and empty houses"""
     agents = 0
     empty = 0
     landmarks = 0
@@ -15,9 +16,10 @@ def agent_count(city):
             landmarks += 1
         else:
             empty += 1
-    
-# Counts hoshen_kopelman clusters for religion
+
+
 def cluster_religion(city):
+    """Counts hoshen_kopelman clusters for religion"""
     agent_counted = []
     clusters = []
     for (x,y), house in np.ndenumerate(city):
@@ -79,9 +81,9 @@ def cluster_religion(city):
     mean_cluster_size = total_count/len(clusters)
     return len(clusters), mean_cluster_size
 
-    
-# Counts hoshen_kopelman clusters for ethnicity
+
 def cluster_ethnicity(city):
+    """Counts hoshen_kopelman clusters for ethnicity"""
     agent_counted = []
     clusters = []
     for (x,y), house in np.ndenumerate(city):
@@ -144,8 +146,8 @@ def cluster_ethnicity(city):
     return len(clusters), mean_cluster_size
 
 
-# Income comparison
 def income_comparison(city):
+    """Income comparison"""
     income_happiness = []
     for (x,y), house in np.ndenumerate(city):
         if x > w or y > h:
